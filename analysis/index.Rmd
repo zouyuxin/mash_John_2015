@@ -7,17 +7,23 @@ output:
 
 Application of `mash` on Blischak, John D., et al. "Mycobacterial infection induces a specific human innate immune response." Scientific reports 5 (2015).
 
-We focus on the time 18 data only.
-
 John treated the individual effect as fixed in the model. Here we implement `mash` with indiviudal as random
 
 # Data
-1. Indivivual as random: [Count18_IndRan](Count18_IndRanBayes.html)
-2. Indivivual as fixed: [Count18_IndFix](Count18_IndFixBayes.html)
+1. Indivivual as random: [Count_IndRan](Count_IndRanBayes.html)
+2. Indivivual as fixed: [Count_IndFix](Count_IndFixBayes.html)
+
+We focus on the time 18 data only.
 
 # Mash
 1. Indivivual as random EE: [Count18_IndRan_Mash_EE](Count18_Mash_IndRanBayes_EE.html)
 2. Indivivual as random EZ: [Count18_IndRan_Mash_EZ](Count18_Mash_IndRanBayes_EZ.html)
 3. Indivivual as fixed EE: [Count18_IndFix_Mash_EE](Count18_Mash_IndFixBayes_EE.html)
 
-The Shat in the data are correponding to a t statistics. We transformed them to Shat from the z statistics. If we didn't do the transformation, [Count18_IndFix_Mash_EET](Count18_Mash_IndFixBayes_EET.html)
+The Shat in the data are correponding to a t statistics. We transformed them to Shat from the z statistics. If we didn't do the transformation: [Count18_IndFix_Mash_EET](Count18_Mash_IndFixBayes_EET.html)
+
+# Flash
+1. Flash on C: [Count18_FlashC](Count18_FlashC.html)
+2. Flash on D: [Count18_FlashD](Count18_FlashD.html)
+
+

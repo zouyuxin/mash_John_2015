@@ -1,0 +1,113 @@
+---
+title: "JohnCount18 Flash on deviation"
+author: "Yuxin Zou"
+date: 2018-4-17
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r, echo=FALSE}
+# TEMPORARY.
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+```{r packages}
+library(flashr); library(colorRamps); library(corrplot); library(mashr)
+```
+
+Read Count 18 Ind Random data
+```{r}
+data = readRDS('../output/Count_IndRan_limmaBayes.rds')
+# Time 18
+Eighteen = grepl('t18', colnames(data$beta))
+
+beta_class = data$beta[, Eighteen]
+sebeta_class = data$sebeta[, Eighteen]
+colnames(beta_class) = colnames(sebeta_class) = gsub( "\\..*$", "", colnames(beta_class))
+```
+
+## Flash on deviation (over control)
+
+```{r}
+mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = data$df[1])
+L = diag(ncol(beta_class))
+# the first col is none
+L[,1] = -1
+L = L[2:9,]
+mash.data.diff = mash_set_data_contrast(mash.data, L)
+
+flash.data.d = flash_set_data(mash.data.diff$Bhat/mash.data.diff$Shat)
+flash.model.d = flash(flash.data.d, greedy = TRUE, backfit = TRUE)
+```
+
+```{r}
+factors = flash_get_ldf(flash.model.d)$f
+row.names(factors) = colnames(beta_class)[-1]
+pve.order = order(flash_get_pve(flash.model.d), decreasing = TRUE)
+
+par(mfrow=c(2,2))
+for(i in pve.order){
+  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(flash_get_pve(flash.model.d)[i],3)), las=2, cex.names = 0.7)
+}
+par(mfrow=c(1,1))
+```
+
+Flash on loading:
+```{r}
+loading.d = flash.model.d$EL[, 1:7]
+flash.data.dl = flash_set_data(loading.d)
+flash.model.dl = flash(flash.data.dl, greedy = TRUE, backfit = TRUE)
+```
+
+## Flash on centered deviation (over control)
+
+```{r}
+D = mash.data.diff$Bhat/mash.data.diff$Shat
+D.center = apply(D, 2, function(x) x - mean(x))
+
+flash.data.dc = flash_set_data(D.center)
+flash.model.dc = flash(flash.data.dc, greedy = TRUE, backfit = TRUE)
+```
+
+```{r}
+factors = flash_get_ldf(flash.model.dc)$f
+row.names(factors) = colnames(beta_class)[-1]
+pve.order = order(flash_get_pve(flash.model.dc), decreasing = TRUE)
+
+par(mfrow=c(2,2))
+for(i in pve.order){
+  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(flash_get_pve(flash.model.dc)[i],3)), las=2, cex.names = 0.7)
+}
+par(mfrow=c(1,1))
+```
+
+Flash on loading:
+```{r}
+loading.dc = flash.model.dc$EL[, 1:7]
+flash.data.dcl = flash_set_data(loading.dc)
+flash.model.dcl = flash(flash.data.dcl, greedy = TRUE, backfit = TRUE)
+```
+
+# Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
