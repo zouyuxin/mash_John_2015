@@ -348,10 +348,14 @@ div.section {
 ##     dens</code></pre>
 <pre class="r"><code>library(flashr); library(colorRamps); library(corrplot)</code></pre>
 <pre><code>## corrplot 0.84 loaded</code></pre>
-<pre class="r"><code>data = readRDS(&#39;../output/Count18_IndRan_limmaBayes.rds&#39;)
-beta_class = data$beta
-sebeta_class = data$sebeta</code></pre>
 <p>Implement <code>mash</code> on John’s data at time point 18.</p>
+<pre class="r"><code>data = readRDS(&#39;../output/Count_IndRan_limmaBayes.rds&#39;)
+# Time 18
+Eighteen = grepl(&#39;t18&#39;, colnames(data$beta))
+
+beta_class = data$beta[, Eighteen]
+sebeta_class = data$sebeta[, Eighteen]
+colnames(beta_class) = colnames(sebeta_class) = gsub( &quot;\\..*$&quot;, &quot;&quot;, colnames(beta_class))</code></pre>
 <div id="mash" class="section level1">
 <h1>Mash</h1>
 <p>Set mash data object</p>
@@ -365,11 +369,8 @@ mash.data.diff = mash_set_data_contrast(mash.data, L)</code></pre>
 <pre class="r"><code># find strong genes
 m.1by1 = mash_1by1(mash.data.diff, alpha=0)
 strong = get_significant_results(m.1by1)
-# no strong genes
-# use t greater than 2.5
 Z = mash.data.diff$Bhat/mash.data.diff$Shat
-Z.strong = Z[apply(abs(Z), 1, max) &gt; 2.5,]
-strong = which(apply(abs(Z), 1, max) &gt; 2.5)
+Z.strong = Z[strong,]
 # center
 Z.center = apply(Z.strong, 2, function(x) x - mean(x))</code></pre>
 <div id="estimate-covariance-structures" class="section level2">
@@ -384,7 +385,7 @@ fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)</code></pre>
 <pre><code>## fitting factor/loading 4</code></pre>
 <pre><code>## fitting factor/loading 5</code></pre>
 <pre class="r"><code>flash_get_pve(fmodel)</code></pre>
-<pre><code>## [1] 0.915755604 0.047185935 0.005703769 0.006621886</code></pre>
+<pre><code>## [1] 0.935588817 0.042390490 0.003702197 0.002567636</code></pre>
 <pre class="r"><code>factors = flash_get_ldf(fmodel)$f
 row.names(factors) = colnames(beta_class)[2:9]
 pve.order = order(flash_get_pve(fmodel), decreasing = TRUE)
@@ -407,9 +408,9 @@ flmodel = flash(flash.loading, greedy = TRUE, backfit = TRUE)</code></pre>
 <pre class="r"><code>mod = Mclust(loading)
 summary(mod$BIC)</code></pre>
 <pre><code>## Best BIC values:
-##              VVE,3     VEE,6       VVE,4
-## BIC      -1766.437 -1786.971 -1795.93622
-## BIC diff     0.000   -20.534   -29.49946</code></pre>
+##             VVE,8       VVE,9       VVV,5
+## BIC      -5582.31 -5602.97885 -5630.72912
+## BIC diff     0.00   -20.66848   -48.41876</code></pre>
 <p>Using clustering result to fit <code>mash</code>:</p>
 <p><span class="math display">\[l_{i}\sim \sum_{j=1}^{m}N(\mu_{j}, \Sigma_{j})\]</span> We estimate the covariance as <span class="math inline">\(F(\Sigma_j + \mu_{j}\mu_{j}&#39;)F&#39;\)</span>.</p>
 <pre class="r"><code>U_list = alply(mod$parameters$variance$sigma,3)
@@ -450,31 +451,48 @@ saveRDS(cov_ed(mash.data.ed, U.dd), &#39;../output/Count18_IndRanBayes_MashEZ_Co
 <pre class="r"><code>mash.model = readRDS(&#39;../output/Count18_IndRanBayes_mash_model_EZ.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -120812.3</code></pre>
+<pre><code>## [1] -134187.7</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
 <p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>Check Load_3 matrix</p>
-<pre class="r"><code>x           &lt;- cov2cor(mash.model$fitted_g$Ulist[[&quot;ED_Load_3&quot;]])
+<p>Check Load_2 matrix</p>
+<pre class="r"><code>x           &lt;- cov2cor(mash.model$fitted_g$Ulist[[&quot;ED_Load_2&quot;]])
 x[x &gt; 1]    &lt;- 1
 x[x &lt; -1]   &lt;- -1
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;,cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,&quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40), tl.cex=1.2)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_3-1.png" width="672" /></p>
+<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_2-1.png" width="672" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_Load_3&quot;]])
+svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_Load_2&quot;]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for Load_3&quot;))</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_3%20pca-1.png" width="672" /></p>
-<p>The first eigenvector is the overall effects.</p>
-<p>There are 19 diferentially expressed genes.</p>
+          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for Load_2&quot;))</code></pre>
+<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_2%20pca-1.png" width="672" /></p>
+<p>Check XX matrix</p>
+<pre class="r"><code>x           &lt;- cov2cor(mash.model$fitted_g$Ulist[[&quot;ED_XX&quot;]])
+x[x &gt; 1]    &lt;- 1
+x[x &lt; -1]   &lt;- -1
+colnames(x) &lt;- colnames(beta_class)[2:9]
+rownames(x) &lt;- colnames(x)
+corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;,cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,&quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40), tl.cex=1.2)</code></pre>
+<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/XX-1.png" width="672" /></p>
+<pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
+svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_XX&quot;]])
+v = svd.out$v
+colnames(v) = colnames(beta_class)[-1]
+rownames(v) = colnames(v)
+options(repr.plot.width=10, repr.plot.height=5)
+for (j in 1:4)
+  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
+          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for XX&quot;))</code></pre>
+<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/XX%20pca-1.png" width="672" /></p>
+<p>There are 1353 diferentially expressed genes.</p>
 <p>Check pairwise sharing by magnitude and sign:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model)
 x[x &gt; 1]    &lt;- 1
