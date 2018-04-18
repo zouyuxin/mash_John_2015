@@ -396,7 +396,7 @@ for(i in pve.order){
   barplot(factors[,i], main=paste0(&#39;Factor &#39;,i, &#39; pve= &#39;, round(flash_get_pve(fmodel)[i],3)), las=2, cex.names = 0.7)
 }
 par(mfrow=c(1,1))</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/flash%20plot-1.png" width="672" /> Factor 2 is the effect of Yers and Salm.</p>
+<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/flash%20plot-1.png" width="672" /></p>
 <p><code>flash</code> on the loading:</p>
 <pre class="r"><code>loading = fmodel$EL[,1:5]
 colnames(loading) = paste0(&#39;Factor&#39;,seq(1,5))
