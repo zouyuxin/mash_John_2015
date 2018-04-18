@@ -34,13 +34,17 @@ library(limma); library(mashr); library(mclust); library(plyr);
 library(flashr); library(colorRamps); library(corrplot)
 ```
 
-```{r data}
-data = readRDS('../output/Count18_IndRan_limmaBayes.rds')
-beta_class = data$beta
-sebeta_class = data$sebeta
-```
-
 Implement `mash` on John's data at time point 18.
+
+```{r data}
+data = readRDS('../output/Count_IndRan_limmaBayes.rds')
+# Time 18
+Eighteen = grepl('t18', colnames(data$beta))
+
+beta_class = data$beta[, Eighteen]
+sebeta_class = data$sebeta[, Eighteen]
+colnames(beta_class) = colnames(sebeta_class) = gsub( "\\..*$", "", colnames(beta_class))
+```
 
 # Mash
 
@@ -59,11 +63,8 @@ Top genes:
 # find strong genes
 m.1by1 = mash_1by1(mash.data.diff, alpha=0)
 strong = get_significant_results(m.1by1)
-# no strong genes
-# use t greater than 2.5
 Z = mash.data.diff$Bhat/mash.data.diff$Shat
-Z.strong = Z[apply(abs(Z), 1, max) > 2.5,]
-strong = which(apply(abs(Z), 1, max) > 2.5)
+Z.strong = Z[strong,]
 # center
 Z.center = apply(Z.strong, 2, function(x) x - mean(x))
 ```
@@ -174,10 +175,10 @@ options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_3 matrix
+Check Load_2 matrix
 
-```{r Load_3}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_3"]])
+```{r Load_2}
+x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_2"]])
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[2:9]
@@ -185,19 +186,40 @@ rownames(x) <- colnames(x)
 corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
 ```
 
-```{r Load_3 pca}
+```{r Load_2 pca}
 layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_3"]])
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_2"]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load_3"))
+          las = 2, main = paste0("EigenVector ", j, " for Load_2"))
 ```
 
-The first eigenvector is the overall effects.
+Check XX matrix
+
+```{r XX}
+x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_XX"]])
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[2:9]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+```
+
+```{r XX pca}
+layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_XX"]])
+v = svd.out$v
+colnames(v) = colnames(beta_class)[-1]
+rownames(v) = colnames(v)
+options(repr.plot.width=10, repr.plot.height=5)
+for (j in 1:4)
+  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
+          las = 2, main = paste0("EigenVector ", j, " for XX"))
+```
 
 There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 

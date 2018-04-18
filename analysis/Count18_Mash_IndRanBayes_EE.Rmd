@@ -34,13 +34,17 @@ library(limma); library(mashr); library(mclust); library(plyr);
 library(flashr); library(colorRamps); library(corrplot)
 ```
 
-```{r data}
-data = readRDS('../output/Count18_IndRan_limmaBayes.rds')
-beta_class = data$beta
-sebeta_class = data$sebeta
-```
-
 Implement `mash` on John's data at time point 18.
+
+```{r data}
+data = readRDS('../output/Count_IndRan_limmaBayes.rds')
+# Time 18
+Eighteen = grepl('t18', colnames(data$beta))
+
+beta_class = data$beta[, Eighteen]
+sebeta_class = data$sebeta[, Eighteen]
+colnames(beta_class) = colnames(sebeta_class) = gsub( "\\..*$", "", colnames(beta_class))
+```
 
 # Mash
 
@@ -59,11 +63,8 @@ Top genes:
 # find strong genes
 m.1by1 = mash_1by1(mash.data.diff, alpha=0)
 strong = get_significant_results(m.1by1)
-# only one strong genes
-# use t greater than 2.5
 Z = mash.data.diff$Bhat/mash.data.diff$Shat
-Z.strong = Z[apply(abs(Z), 1, max) > 2.5,]
-strong = which(apply(abs(Z), 1, max) > 2.5)
+Z.strong = Z[strong,]
 # center
 Z.center = apply(Z.strong, 2, function(x) x - mean(x))
 ```
@@ -83,7 +84,7 @@ factors = flash_get_ldf(fmodel)$f
 row.names(factors) = colnames(beta_class)[2:9]
 pve.order = order(flash_get_pve(fmodel), decreasing = TRUE)
 
-par(mfrow=c(2,2))
+par(mfrow=c(2,3))
 for(i in pve.order){
   barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(flash_get_pve(fmodel)[i],3)), las=2, cex.names = 0.7)
 }
@@ -93,8 +94,8 @@ Factor 2 is the effect of Yers and Salm.
 
 `flash` on the loading:
 ```{r flashLoading}
-loading = fmodel$EL[,1:4]
-colnames(loading) = paste0('F',seq(1,4))
+loading = fmodel$EL[,1:5]
+colnames(loading) = paste0('Factor',seq(1,5))
 flash.loading = flash_set_data(loading)
 flmodel = flash(flash.loading, greedy = TRUE, backfit = TRUE)
 ```
@@ -119,7 +120,7 @@ for (i in 1:length(U_list)){
   ll[[i]] = U_list[[i]] + mu_list[[i]] %*% t(mu_list[[i]])
 }
 
-Factors = fmodel$EF[,1:4]
+Factors = fmodel$EF[,1:5]
 U.loading = lapply(ll, function(U){Factors %*% (U %*% t(Factors))})
 names(U.loading) = paste0('Load', "_", (1:length(U.loading)))
 
@@ -174,10 +175,10 @@ options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_5 matrix
+Check Load_6 matrix
 
-```{r Load5}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_5"]])
+```{r Load6}
+x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_6"]])
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[2:9]
@@ -185,19 +186,40 @@ rownames(x) <- colnames(x)
 corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.99,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
 ```
 
-```{r Load5 pca}
+```{r Load6 pca}
 layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_5"]])
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_6"]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load 5"))
+          las = 2, main = paste0("EigenVector ", j, " for Load 6"))
 ```
 
-The first eigenvector is the overall effects.
+Check Load_8 matrix
+
+```{r Load8}
+x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_8"]])
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[2:9]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.99,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+```
+
+```{r Load8 pca}
+layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_8"]])
+v = svd.out$v
+colnames(v) = colnames(beta_class)[-1]
+rownames(v) = colnames(v)
+options(repr.plot.width=10, repr.plot.height=5)
+for (j in 1:4)
+  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
+          las = 2, main = paste0("EigenVector ", j, " for Load 8"))
+```
 
 There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 
