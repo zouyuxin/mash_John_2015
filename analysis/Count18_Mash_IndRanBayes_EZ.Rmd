@@ -90,7 +90,6 @@ for(i in pve.order){
 }
 par(mfrow=c(1,1))
 ```
-Factor 2 is the effect of Yers and Salm.
 
 `flash` on the loading:
 ```{r flashLoading}
