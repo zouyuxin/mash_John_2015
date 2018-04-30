@@ -165,11 +165,11 @@ mash.model = readRDS('../output/Count18_IndRanBayes_mash_model_EE.rds')
 ```
 
 The log-likelihood of fit is
-```{r} 
+```{r loglik} 
 get_loglik(mash.model)
 ```
 Here is a plot of weights learned:
-```{r}
+```{r estimated weight}
 options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
