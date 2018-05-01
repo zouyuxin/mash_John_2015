@@ -348,8 +348,8 @@ Eighteen = grepl(&#39;t18&#39;, colnames(data$beta))
 beta_class = data$beta[, Eighteen]
 sebeta_class = data$sebeta[, Eighteen]
 colnames(beta_class) = colnames(sebeta_class) = gsub( &quot;\\..*$&quot;, &quot;&quot;, colnames(beta_class))</code></pre>
-<div id="flash-on-z" class="section level1">
-<h1>Flash on Z</h1>
+<div id="flash-on-z-cshat" class="section level1">
+<h1>Flash on Z (C/Shat)</h1>
 <p>Set flash data object</p>
 <pre class="r"><code>mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = data$df[1], alpha=1)
 flash.data = flash_set_data(mash.data$Bhat)
@@ -370,6 +370,7 @@ for(i in pve.order){
 }
 par(mfrow=c(1,1))</code></pre>
 <p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The first factor is the overall effect. The second factor is the effect from Yers and Salm.</p>
 <p>Flash on loading:</p>
 <pre class="r"><code>loading = flash.model$EL[, 1:5]
 flash.data.l = flash_set_data(loading)
@@ -388,15 +389,20 @@ for(i in pve.order){
   barplot(factorsl[,i], main=paste0(&#39;Factor &#39;,i, &#39; pve= &#39;, round(flash_get_pve(flash.model.l)[i],3)), las=2, cex.names = 0.7)
 }
 par(mfrow=c(1,1))</code></pre>
-<p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<pre class="r"><code>factorALL = factors %*% factorsl
+<p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-6-1.png" width="672" /> <!--
+
+```r
+factorALL = factors %*% factorsl
 factorALL = scale(factorALL, scale = sqrt(colSums(factorALL^2)), center = FALSE)
 par(mfrow=c(2,2))
 for(i in 1:3){
-  barplot(factorALL[,i], main=paste0(&#39;Factor &#39;,i), las=2, cex.names = 0.7)
+  barplot(factorALL[,i], main=paste0('Factor ',i), las=2, cex.names = 0.7)
 }
-par(mfrow=c(1,1))</code></pre>
-<p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+par(mfrow=c(1,1))
+```
+
+<img src="Count18_FlashC_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+--></p>
 <div id="flash-on-centered-z" class="section level2">
 <h2>Flash on centered Z</h2>
 <pre class="r"><code>Z.center = apply(mash.data$Bhat, 2, function(x) x - mean(x))
@@ -436,14 +442,23 @@ for(i in pve.order){
 }</code></pre>
 <p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code>par(mfrow=c(1,1))</code></pre>
-<pre class="r"><code>factorALL = factors %*% factorsl
+<!--
+
+```r
+factorALL = factors %*% factorsl
 factorALL = scale(factorALL, scale = sqrt(colSums(factorALL^2)), center = FALSE)
 par(mfrow=c(1,2))
 for(i in 1:2){
-  barplot(factorALL[,i], main=paste0(&#39;Factor &#39;,i), las=2, cex.names = 0.7)
-}</code></pre>
-<p><img src="Count18_FlashC_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
-<pre class="r"><code>par(mfrow=c(1,1))</code></pre>
+  barplot(factorALL[,i], main=paste0('Factor ',i), las=2, cex.names = 0.7)
+}
+```
+
+<img src="Count18_FlashC_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+
+```r
+par(mfrow=c(1,1))
+```
+-->
 </div>
 </div>
 <div id="session-information" class="section level1">
