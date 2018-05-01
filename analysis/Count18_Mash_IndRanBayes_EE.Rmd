@@ -48,7 +48,8 @@ colnames(beta_class) = colnames(sebeta_class) = gsub( "\\..*$", "", colnames(bet
 
 # Mash
 
-Set mash data object
+Set mash data object: the standard errors in the data are corresponding to t statistics.
+
 ```{r mash.data}
 mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = data$df[1])
 L = diag(ncol(beta_class))
@@ -225,18 +226,6 @@ There are `r length(get_significant_results(mash.model))` diferentially expresse
 Check pairwise sharing by magnitude and sign:
 ```{r}
 x = get_pairwise_sharing(mash.model)
-x[x > 1]    <- 1
-x[x < -1]   <- -1
-colnames(x) <- colnames(beta_class)[-1]
-rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
-                               "#E0F3F8","#91BFDB","#4575B4")))(40),
-               tl.cex=1.2)
-```
-
-Ignoring the sign
-```{r}
-x = get_pairwise_sharing(mash.model, FUN = abs)
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]
