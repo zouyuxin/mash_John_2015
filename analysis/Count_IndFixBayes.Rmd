@@ -25,7 +25,7 @@ knitr::read_chunk("chunks.R")
 
 <!-- Insert the R version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-```{r R-version, echo=FALSE, results='asis'}
+```{r code-version, echo=FALSE, results='asis'}
 ```
 
 ```{r, echo=FALSE}
@@ -33,7 +33,7 @@ knitr::read_chunk("chunks.R")
 knitr::opts_chunk$set(eval = TRUE)
 ```
 
-The type of bacteria (bact), and the time post-infection (time) are treated as fixed effects. The individual (ind) is treated as random effect.
+The type of bacteria (bact), and the time post-infection (time) are treated as fixed effects. The individual (ind) is treated as fixed effect.
 
 The covariates RIN (rin) and extraction batch (extr) are included in the model to correct for these confounding effects.
 
@@ -74,7 +74,7 @@ groups$extr <- factor(groups$extr)
 head(groups)
 ```
 
-* Create the model using a treatment parametrization
+* Create the model using a group means parametrization
 ```{r model}
 contrasts(groups$extr) = contr.Sum(levels(groups$extr))
 contrasts(groups$ind) = contr.Sum(levels(groups$ind))

@@ -25,7 +25,7 @@ knitr::read_chunk("chunks.R")
 
 <!-- Insert the R version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-```{r R-version, echo=FALSE, results='asis'}
+```{r code-version, echo=FALSE, results='asis'}
 ```
 
 ```{r, echo=FALSE}
@@ -74,7 +74,7 @@ groups$extr <- factor(groups$extr)
 head(groups)
 ```
 
-* Create the model using a treatment parametrization
+* Create the model using a group means parametrization
 ```{r model}
 contrasts(groups$extr) = contr.Sum(levels(groups$extr))
 design <- model.matrix(~ 0 + bact:time, data = groups)
