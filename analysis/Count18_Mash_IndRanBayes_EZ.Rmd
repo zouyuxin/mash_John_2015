@@ -11,6 +11,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
 <!-- Update knitr chunk options -->
 ```{r knitr-opts-chunk, include=FALSE}
 ```
@@ -77,7 +81,6 @@ Flash:
 ```{r flash}
 flash.data = flash_set_data(Z.center)
 fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
-flash_get_pve(fmodel)
 ```
 ```{r flash plot}
 factors = flash_get_ldf(fmodel)$f
@@ -151,7 +154,7 @@ saveRDS(cov_ed(mash.data.ed, U.dd), '../output/Count18_IndRanBayes_MashEZ_Cov.rd
 ```
 
 ## Mash model:
-```{r, echo=FALSE}
+```{r}
 U.ed = readRDS('../output/Count18_IndRanBayes_MashEZ_Cov.rds')
 ```
 
@@ -229,6 +232,7 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(-0.05,1), upper.col=colorRa
                                "#E0F3F8","#91BFDB","#4575B4")))(40),
                tl.cex=1.2)
 ```
+
 # Session information
 
 <!-- Insert the session information into the document -->

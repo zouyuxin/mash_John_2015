@@ -11,6 +11,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
 <!-- Update knitr chunk options -->
 ```{r knitr-opts-chunk, include=FALSE}
 ```
@@ -22,11 +26,6 @@ knitr::opts_chunk$set(echo = TRUE)
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
 ```{r code-version, echo=FALSE, results='asis'}
-```
-
-```{r, echo=FALSE}
-# TEMPORARY.
-knitr::opts_chunk$set(eval = TRUE)
 ```
 
 ```{r packages}
@@ -77,7 +76,6 @@ Flash:
 ```{r flash}
 flash.data = flash_set_data(Z.center)
 fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
-flash_get_pve(fmodel)
 ```
 ```{r flash plot}
 factors = flash_get_ldf(fmodel)$f
@@ -151,7 +149,7 @@ saveRDS(cov_ed(mash.data.ed, U.dd), '../output/Count18_IndFixBayes_MashEE_Cov.rd
 ```
 
 ## Mash model:
-```{r, echo=FALSE}
+```{r}
 U.ed = readRDS('../output/Count18_IndFixBayes_MashEE_Cov.rds')
 ```
 
