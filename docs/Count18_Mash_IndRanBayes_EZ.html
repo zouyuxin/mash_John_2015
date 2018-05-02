@@ -455,13 +455,11 @@ saveRDS(cov_ed(mash.data.ed, U.dd), &#39;../output/Count18_IndRanBayes_MashEZ_Co
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
 <p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>Check Load_2 matrix</p>
-<pre class="r"><code>x           &lt;- cov2cor(mash.model$fitted_g$Ulist[[&quot;ED_Load_2&quot;]])
-x[x &gt; 1]    &lt;- 1
-x[x &lt; -1]   &lt;- -1
+<p>Check Load_2 covariance matrix</p>
+<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_Load_2&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
-corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;,cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,&quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40), tl.cex=1.2)</code></pre>
+corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
 <p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_2-1.png" width="672" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
 svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_Load_2&quot;]])
@@ -474,12 +472,10 @@ for (j in 1:4)
           las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for Load_2&quot;))</code></pre>
 <p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/Load_2%20pca-1.png" width="672" /></p>
 <p>Check XX matrix</p>
-<pre class="r"><code>x           &lt;- cov2cor(mash.model$fitted_g$Ulist[[&quot;ED_XX&quot;]])
-x[x &gt; 1]    &lt;- 1
-x[x &lt; -1]   &lt;- -1
+<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_XX&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
-corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;,cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,&quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40), tl.cex=1.2)</code></pre>
+corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
 <p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/XX-1.png" width="672" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
 svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_XX&quot;]])
@@ -501,20 +497,7 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(-0.05,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<p>Ignoring the sign</p>
-<pre class="r"><code>x = get_pairwise_sharing(mash.model, FUN = abs)
-x[x &gt; 1]    &lt;- 1
-x[x &lt; -1]   &lt;- -1
-colnames(x) &lt;- colnames(beta_class)[-1]
-rownames(x) &lt;- colnames(x)
-corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
-                               &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
-               tl.cex=1.2)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/unnamed-chunk-7-1.png" width="672" /> –&gt;</p>
-</div>
-<div id="session-information" class="section level1">
-<h1>Session information</h1>
+<p><img src="Count18_Mash_IndRanBayes_EZ_files/figure-html/unnamed-chunk-6-1.png" width="672" /> # Session information</p>
 <!-- Insert the session information into the document -->
 </div>
 
