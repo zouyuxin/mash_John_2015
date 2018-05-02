@@ -174,15 +174,13 @@ options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_2 matrix
+Check Load_2 covariance matrix
 
 ```{r Load_2}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_2"]])
-x[x > 1]    <- 1
-x[x < -1]   <- -1
+x           <- mash.model$fitted_g$Ulist[["ED_Load_2"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
 
 ```{r Load_2 pca}
@@ -200,12 +198,10 @@ for (j in 1:4)
 Check XX matrix
 
 ```{r XX}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_XX"]])
-x[x > 1]    <- 1
-x[x < -1]   <- -1
+x           <- mash.model$fitted_g$Ulist[["ED_XX"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.2,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
 
 ```{r XX pca}
@@ -233,20 +229,6 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(-0.05,1), upper.col=colorRa
                                "#E0F3F8","#91BFDB","#4575B4")))(40),
                tl.cex=1.2)
 ```
-
-Ignoring the sign
-```{r}
-x = get_pairwise_sharing(mash.model, FUN = abs)
-x[x > 1]    <- 1
-x[x < -1]   <- -1
-colnames(x) <- colnames(beta_class)[-1]
-rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
-                               "#E0F3F8","#91BFDB","#4575B4")))(40),
-               tl.cex=1.2)
-```
--->
-
 # Session information
 
 <!-- Insert the session information into the document -->
