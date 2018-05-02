@@ -335,19 +335,21 @@ div.section {
 
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-02</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
+<p><strong>Code version:</strong> 6880b80</p>
 <pre class="r"><code>library(limma); library(mashr); library(mclust); library(plyr);</code></pre>
-<pre><code>## Loading required package: ashr</code></pre>
-<pre><code>## Package &#39;mclust&#39; version 5.4
-## Type &#39;citation(&quot;mclust&quot;)&#39; for citing this R package in publications.</code></pre>
-<pre><code>## 
-## Attaching package: &#39;mclust&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:ashr&#39;:
-## 
-##     dens</code></pre>
+<pre><code>Loading required package: ashr</code></pre>
+<pre><code>Package &#39;mclust&#39; version 5.4
+Type &#39;citation(&quot;mclust&quot;)&#39; for citing this R package in publications.</code></pre>
+<pre><code>
+Attaching package: &#39;mclust&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:ashr&#39;:
+
+    dens</code></pre>
 <pre class="r"><code>library(flashr); library(colorRamps); library(corrplot)</code></pre>
-<pre><code>## corrplot 0.84 loaded</code></pre>
+<pre><code>corrplot 0.84 loaded</code></pre>
 <p>Implement <code>mash</code> on John’s data at time point 18.</p>
 <pre class="r"><code>data = readRDS(&#39;../output/Count_IndRan_limmaBayes.rds&#39;)
 # Time 18
@@ -379,14 +381,12 @@ Z.center = apply(Z.strong, 2, function(x) x - mean(x))</code></pre>
 <p>Flash:</p>
 <pre class="r"><code>flash.data = flash_set_data(Z.center)
 fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)</code></pre>
-<pre><code>## fitting factor/loading 1</code></pre>
-<pre><code>## fitting factor/loading 2</code></pre>
-<pre><code>## fitting factor/loading 3</code></pre>
-<pre><code>## fitting factor/loading 4</code></pre>
-<pre><code>## fitting factor/loading 5</code></pre>
-<pre><code>## fitting factor/loading 6</code></pre>
-<pre class="r"><code>flash_get_pve(fmodel)</code></pre>
-<pre><code>## [1] 0.9337379124 0.0464326209 0.0040986092 0.0008176090 0.0006329561</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
+<pre><code>fitting factor/loading 2</code></pre>
+<pre><code>fitting factor/loading 3</code></pre>
+<pre><code>fitting factor/loading 4</code></pre>
+<pre><code>fitting factor/loading 5</code></pre>
+<pre><code>fitting factor/loading 6</code></pre>
 <pre class="r"><code>factors = flash_get_ldf(fmodel)$f
 row.names(factors) = colnames(beta_class)[2:9]
 pve.order = order(flash_get_pve(fmodel), decreasing = TRUE)
@@ -396,21 +396,21 @@ for(i in pve.order){
   barplot(factors[,i], main=paste0(&#39;Factor &#39;,i, &#39; pve= &#39;, round(flash_get_pve(fmodel)[i],3)), las=2, cex.names = 0.7)
 }
 par(mfrow=c(1,1))</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/flash%20plot-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/flash%20plot-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p><code>flash</code> on the loading:</p>
 <pre class="r"><code>loading = fmodel$EL[,1:5]
 colnames(loading) = paste0(&#39;Factor&#39;,seq(1,5))
 flash.loading = flash_set_data(loading)
 flmodel = flash(flash.loading, greedy = TRUE, backfit = TRUE)</code></pre>
-<pre><code>## fitting factor/loading 1</code></pre>
+<pre><code>fitting factor/loading 1</code></pre>
 <p>The flash prefers the rank 0 model. There is no hidden structure in the loading matrix.</p>
 <p>Cluster loadings:</p>
 <pre class="r"><code>mod = Mclust(loading)
 summary(mod$BIC)</code></pre>
-<pre><code>## Best BIC values:
-##              VVE,8       VVE,9      VVV,6
-## BIC      -9163.864 -9196.84198 -9279.5577
-## BIC diff     0.000   -32.97814  -115.6939</code></pre>
+<pre><code>Best BIC values:
+             VVE,8       VVE,9      VVV,6
+BIC      -9163.864 -9196.84198 -9279.5577
+BIC diff     0.000   -32.97814  -115.6939</code></pre>
 <p>Using clustering result to fit <code>mash</code>:</p>
 <p><span class="math display">\[l_{i}\sim \sum_{j=1}^{m}N(\mu_{j}, \Sigma_{j})\]</span> We estimate the covariance as <span class="math inline">\(F(\Sigma_j + \mu_{j}\mu_{j}&#39;)F&#39;\)</span>.</p>
 <pre class="r"><code>U_list = alply(mod$parameters$variance$sigma,3)
@@ -443,6 +443,7 @@ saveRDS(cov_ed(mash.data.ed, U.dd), &#39;../output/Count18_IndRanBayes_MashEE_Co
 </div>
 <div id="mash-model" class="section level2">
 <h2>Mash model:</h2>
+<pre class="r"><code>U.ed = readRDS(&#39;../output/Count18_IndRanBayes_MashEE_Cov.rds&#39;)</code></pre>
 <pre class="r"><code>saveRDS(mash(mash.data.diff, c(U.c, U.ed), algorithm.version = &#39;R&#39;), &#39;../output/Count18_IndRanBayes_mash_model_EE.rds&#39;) </code></pre>
 </div>
 </div>
@@ -451,17 +452,17 @@ saveRDS(cov_ed(mash.data.ed, U.dd), &#39;../output/Count18_IndRanBayes_MashEE_Co
 <pre class="r"><code>mash.model = readRDS(&#39;../output/Count18_IndRanBayes_mash_model_EE.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -52041</code></pre>
+<pre><code>[1] -52041</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/estimated%20weight-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/estimated%20weight-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Check Load_6 covariance matrix</p>
 <pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_Load_6&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
 corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/Load6-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/Load6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
 svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_Load_6&quot;]])
 v = svd.out$v
@@ -471,13 +472,13 @@ options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
           las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for Load 6&quot;))</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/Load6%20pca-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/Load6%20pca-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Check Load_8 covariance matrix</p>
 <pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_Load_8&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
 corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/Load8-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/Load8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
 svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_Load_8&quot;]])
 v = svd.out$v
@@ -487,7 +488,7 @@ options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
           las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for Load 8&quot;))</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/Load8%20pca-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/Load8%20pca-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Both matrices represent that deviations are shared in sign among conditions. The deviations in Yers and Salm are strongest, but weaker in BCG and RV+.</p>
 <p>There are 3034 diferentially expressed genes.</p>
 <p>Check pairwise sharing by magnitude and sign:</p>
@@ -499,7 +500,7 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Check pairwise sharing by sign:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model, factor=0)
 x[x &gt; 1]    &lt;- 1
@@ -509,11 +510,46 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Count18_Mash_IndRanBayes_EE_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="figure/Count18_Mash_IndRanBayes_EE.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="session-information" class="section level1">
 <h1>Session information</h1>
 <!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.4
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] corrplot_0.84  colorRamps_2.3 flashr_0.5-6   plyr_1.8.4    
+[5] mclust_5.4     mashr_0.2-6    ashr_2.2-7     limma_3.34.9  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.16      pillar_1.2.2      compiler_3.4.4   
+ [4] git2r_0.21.0      iterators_1.0.9   tools_3.4.4      
+ [7] digest_0.6.15     tibble_1.4.2      evaluate_0.10.1  
+[10] gtable_0.2.0      lattice_0.20-35   rlang_0.2.0      
+[13] Matrix_1.2-14     foreach_1.4.4     yaml_2.1.18      
+[16] parallel_3.4.4    mvtnorm_1.0-7     ebnm_0.1-11      
+[19] stringr_1.3.0     knitr_1.20        REBayes_1.3      
+[22] rprojroot_1.3-2   grid_3.4.4        rmarkdown_1.9    
+[25] rmeta_3.0         ggplot2_2.2.1     magrittr_1.5     
+[28] backports_1.1.2   scales_0.5.0      codetools_0.2-15 
+[31] htmltools_0.3.6   MASS_7.3-50       assertthat_0.2.0 
+[34] softImpute_1.4    colorspace_1.3-2  stringi_1.1.7    
+[37] Rmosek_8.0.69     lazyeval_0.2.1    pscl_1.5.2       
+[40] doParallel_1.0.11 munsell_0.4.3     truncnorm_1.0-8  
+[43] SQUAREM_2017.10-1</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
