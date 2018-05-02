@@ -176,15 +176,13 @@ barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 
 There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 
-Check Load_5 matrix
+Check Load_5 covariance matrix
 
 ```{r Load5}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_5"]])
-x[x > 1]    <- 1
-x[x < -1]   <- -1
+x           <- mash.model$fitted_g$Ulist[["ED_Load_5"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.99,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
 
 ```{r Load5 pca}
