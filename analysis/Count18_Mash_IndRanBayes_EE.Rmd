@@ -175,15 +175,13 @@ options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_6 matrix
+Check Load_6 covariance matrix
 
 ```{r Load6}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_6"]])
-x[x > 1]    <- 1
-x[x < -1]   <- -1
+x           <- mash.model$fitted_g$Ulist[["ED_Load_6"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.99,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
 
 ```{r Load6 pca}
@@ -198,15 +196,13 @@ for (j in 1:4)
           las = 2, main = paste0("EigenVector ", j, " for Load 6"))
 ```
 
-Check Load_8 matrix
+Check Load_8 covariance matrix
 
 ```{r Load8}
-x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_8"]])
-x[x > 1]    <- 1
-x[x < -1]   <- -1
+x           <- mash.model$fitted_g$Ulist[["ED_Load_8"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(0.99,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
 
 ```{r Load8 pca}
@@ -221,11 +217,25 @@ for (j in 1:4)
           las = 2, main = paste0("EigenVector ", j, " for Load 8"))
 ```
 
+Both matrices represent that deviations are shared in sign among conditions. The deviations in Yers and Salm are strongest, but weaker in BCG and RV+.
+
 There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 
 Check pairwise sharing by magnitude and sign:
 ```{r}
 x = get_pairwise_sharing(mash.model)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(40),
+               tl.cex=1.2)
+```
+
+Check pairwise sharing by sign:
+```{r}
+x = get_pairwise_sharing(mash.model, factor=0)
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]
