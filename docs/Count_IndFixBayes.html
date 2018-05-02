@@ -335,10 +335,11 @@ div.section {
 
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-04-17</p>
+<p><strong>Last updated:</strong> 2018-05-02</p>
 <!-- Insert the R version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p>The type of bacteria (bact), and the time post-infection (time) are treated as fixed effects. The individual (ind) is treated as random effect.</p>
+<p><strong>Code version:</strong> 4ffdb40</p>
+<p>The type of bacteria (bact), and the time post-infection (time) are treated as fixed effects. The individual (ind) is treated as fixed effect.</p>
 <p>The covariates RIN (rin) and extraction batch (extr) are included in the model to correct for these confounding effects.</p>
 <pre class="r"><code>library(&quot;limma&quot;)
 library(&quot;edgeR&quot;)
@@ -374,7 +375,7 @@ head(groups)</code></pre>
 5.M375.none.4  M375 none    4    1 8.8
 6.M372.Smeg.48 M372 Smeg   48    1 9.5</code></pre>
 <ul>
-<li>Create the model using a treatment parametrization</li>
+<li>Create the model using a group means parametrization</li>
 </ul>
 <pre class="r"><code>contrasts(groups$extr) = contr.Sum(levels(groups$extr))
 contrasts(groups$ind) = contr.Sum(levels(groups$ind))
@@ -440,18 +441,18 @@ other attached packages:
 [6] limma_3.34.9 
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.16        knitr_1.20          magrittr_1.5       
- [4] splines_3.4.4       MASS_7.3-49         lattice_0.20-35    
- [7] rlang_0.2.0         minqa_1.2.4         stringr_1.3.0      
-[10] tools_3.4.4         grid_3.4.4          data.table_1.10.4-3
-[13] nlme_3.1-137        rio_0.5.10          htmltools_0.3.6    
-[16] abind_1.4-5         readxl_1.0.0        yaml_2.1.18        
-[19] rprojroot_1.3-2     digest_0.6.15       tibble_1.4.2       
-[22] nloptr_1.0.4        curl_3.2            evaluate_0.10.1    
-[25] haven_1.1.1         rmarkdown_1.9       openxlsx_4.0.17    
-[28] stringi_1.1.7       cellranger_1.1.0    pillar_1.2.1       
-[31] compiler_3.4.4      forcats_0.3.0       backports_1.1.2    
-[34] locfit_1.5-9.1      foreign_0.8-69     </code></pre>
+ [1] Rcpp_0.12.16        compiler_3.4.4      pillar_1.2.2       
+ [4] cellranger_1.1.0    nloptr_1.0.4        git2r_0.21.0       
+ [7] forcats_0.3.0       tools_3.4.4         digest_0.6.15      
+[10] evaluate_0.10.1     tibble_1.4.2        nlme_3.1-137       
+[13] lattice_0.20-35     rlang_0.2.0         openxlsx_4.0.17    
+[16] curl_3.2            yaml_2.1.18         haven_1.1.1        
+[19] rio_0.5.10          stringr_1.3.0       knitr_1.20         
+[22] locfit_1.5-9.1      rprojroot_1.3-2     grid_3.4.4         
+[25] data.table_1.10.4-3 readxl_1.1.0        foreign_0.8-70     
+[28] rmarkdown_1.9       minqa_1.2.4         magrittr_1.5       
+[31] backports_1.1.2     htmltools_0.3.6     MASS_7.3-50        
+[34] splines_3.4.4       abind_1.4-5         stringi_1.1.7      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
