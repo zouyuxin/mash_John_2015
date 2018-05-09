@@ -22,6 +22,8 @@ We focus on the time 18 data only.
 
 The Shat in the data are correponding to a t statistics. We transformed them to Shat from the z statistics. If we didn't do the transformation: [Count18_IndFix_Mash_EET](Count18_Mash_IndFixBayes_EET.html)
 
+If we ignore the induced correlation: [Count18_IndRan_Mash_Ignore_EE](Count18_Mash_IndRanBayes_EE_Wrong.html)
+
 # Flash
 1. Flash on C: [Count18_FlashC](Count18_FlashC.html)
 2. Flash on D: [Count18_FlashD](Count18_FlashD.html)
