@@ -1,7 +1,7 @@
 ---
-title: "Count 18 Mash - IndRanBayes - EE"
+title: "Count 18 Mash - IndRanBayes - MEAN"
 author: "Yuxin Zou"
-date: 2018-4-16
+date: 2018-5-2
 output: 
   html_document:
     code_folding: hide
@@ -47,12 +47,14 @@ colnames(beta_class) = colnames(sebeta_class) = gsub( "\\..*$", "", colnames(bet
 
 # Mash
 
-Set mash data object: the standard errors in the data are corresponding to t statistics.
-
+Set mash data object
 ```{r mash.data}
 mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = data$df[1])
-
-mash.data.diff = mash_update_data(mash.data, ref='none')
+R = ncol(beta_class)
+L.full = diag(R) - 1/R * matrix(1, R, R)
+row.names(L.full) = colnames(beta_class)
+L = L.full[1:R-1,]
+mash.data.diff = mash_set_data_contrast(mash.data, L)
 ```
 
 Top genes:
@@ -72,33 +74,35 @@ Data Driven:
 
 Flash:
 ```{r flash}
-fmodel = flash(Z.center, var_type = 'constant', greedy = TRUE, backfit = TRUE, verbose = FALSE)
+flash.data = flash_set_data(Z.center)
+fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
+flash_get_pve(fmodel)
 ```
-
 ```{r flash plot}
-factors = fmodel$ldf$f
-row.names(factors) = colnames(mash.data.diff$Bhat)
-pve.order = order(fmodel$pve, decreasing = TRUE)
+factors = flash_get_ldf(fmodel)$f
+row.names(factors) = colnames(beta_class)[2:9]
+pve.order = order(flash_get_pve(fmodel), decreasing = TRUE)
 
-par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 for(i in pve.order){
-  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
+  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(flash_get_pve(fmodel)[i],3)), las=2, cex.names = 0.7)
 }
 par(mfrow=c(1,1))
 ```
 
 `flash` on the loading:
 ```{r flashLoading}
-loading = fmodel$ldf$l
-colnames(loading) = paste0('Factor',seq(1,4))
-flmodel = flash(loading, greedy = TRUE, backfit = TRUE, var_type = 'constant', verbose = FALSE)
+loading = fmodel$EL[,1:2]
+colnames(loading) = paste0('F',seq(1,2))
+flash.loading = flash_set_data(loading)
+flmodel = flash(flash.loading, greedy = TRUE, backfit = TRUE)
 ```
 
 The flash prefers the rank 0 model. There is no hidden structure in the loading matrix.
 
 Cluster loadings:
 ```{r cluster loading}
-mod = Mclust(loading, 1:20)
+mod = Mclust(loading)
 summary(mod$BIC)
 ```
 
@@ -114,19 +118,19 @@ for (i in 1:length(U_list)){
   ll[[i]] = U_list[[i]] + mu_list[[i]] %*% t(mu_list[[i]])
 }
 
-Factors = fmodel$ldf$f
+Factors = fmodel$EF[,1:2]
 U.loading = lapply(ll, function(U){Factors %*% (U %*% t(Factors))})
 names(U.loading) = paste0('Load', "_", (1:length(U.loading)))
 
 # rank 1
-Flash_res = fmodel$fitted_values
-U.Flash = c(mashr::cov_from_factors(t(as.matrix(Factors)), "Flash"), 
+Flash_res = flash_get_lf(fmodel)
+U.Flash = c(mashr::cov_from_factors(t(as.matrix(factors)), "Flash"), 
             list("tFlash" = t(Flash_res) %*% Flash_res / nrow(Z.center)))
 ```
 
 PCA:
 ```{r pca}
-U.pca = cov_pca(mash_set_data(Z.center), 4)
+U.pca = cov_pca(mash_set_data(Z.center), 2)
 ```
 
 Canonical
@@ -138,76 +142,61 @@ Extreme Deconvolution
 ```{r ED, eval=FALSE}
 U.dd = c(U.pca, U.loading, U.Flash, list('XX' = t(Z.center) %*% Z.center / nrow(Z.center)))
 
-saveRDS(cov_ed(mash.data.diff, U.dd, subset = strong), '../output/Count18_IndRanBayes_MashEE_Cov.rds')
+mash.data.ed = mash.data.diff
+mash.data.ed$Bhat = mash.data.diff$Bhat[strong,]
+mash.data.ed$Shat = mash.data.diff$Shat[strong,]
+mash.data.ed$Shat_alpha = mash.data.diff$Shat_alpha[strong,]
+saveRDS(cov_ed(mash.data.ed, U.dd), '../output/Count18_IndFixBayes_MashEEMean_Cov.rds')
 ```
 
 ## Mash model:
-```{r}
-U.ed = readRDS('../output/Count18_IndRanBayes_MashEE_Cov.rds')
+```{r, echo=FALSE}
+U.ed = readRDS('../output/Count18_IndFixBayes_MashEEMean_Cov.rds')
 ```
 
 ```{r mash, eval=FALSE}
-saveRDS(mash(mash.data.diff, c(U.c, U.ed), algorithm.version = 'R'), '../output/Count18_IndRanBayes_mash_model_EE.rds') 
+saveRDS(mash(mash.data.diff, c(U.c, U.ed), algorithm.version = 'R'), '../output/Count18_IndFixBayes_mash_model_EE_Mean.rds') 
 ```
 
 # Result
 ```{r}
-mash.model = readRDS('../output/Count18_IndRanBayes_mash_model_EE.rds')
+mash.model = readRDS('../output/Count18_IndFixBayes_mash_model_EE_Mean.rds')
 ```
 
 The log-likelihood of fit is
-```{r loglik} 
+```{r} 
 get_loglik(mash.model)
 ```
 Here is a plot of weights learned:
-```{r estimated weight}
+```{r}
 options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_6 covariance matrix
+There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 
-```{r Load6}
-x           <- mash.model$fitted_g$Ulist[["ED_Load_6"]]
+Check Load_1 matrix
+
+```{r Load_5}
+x           <- cov2cor(mash.model$fitted_g$Ulist[["ED_Load_1"]])
+x[x > 1]    <- 1
+x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
-corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
+corrplot.mixed(x, tl.pos="d",upper='color',cl.lim=c(-1,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF","#E0F3F8","#91BFDB","#4575B4")))(40), tl.cex=1.2)
 ```
 
-```{r Load6 pca}
+```{r Load_1 pca}
 layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_6"]])
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_1"]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load 6"))
+          las = 2, main = paste0("EigenVector ", j, " for Load_1"))
 ```
-
-Check Load_8 covariance matrix
-
-```{r Load8}
-x           <- mash.model$fitted_g$Ulist[["ED_Load_8"]]
-colnames(x) <- colnames(beta_class)[2:9]
-rownames(x) <- colnames(x)
-corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
-```
-
-```{r Load8 pca}
-layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_8"]])
-v = svd.out$v
-colnames(v) = colnames(beta_class)[-1]
-rownames(v) = colnames(v)
-options(repr.plot.width=10, repr.plot.height=5)
-for (j in 1:4)
-  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load 8"))
-```
-
-Both matrices represent that deviations are shared in sign among conditions. The deviations in Yers and Salm are strongest, but weaker in BCG and RV+.
 
 There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
 
@@ -223,9 +212,9 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPa
                tl.cex=1.2)
 ```
 
-Check pairwise sharing by sign:
+Ignoring the sign
 ```{r}
-x = get_pairwise_sharing(mash.model, factor=0)
+x = get_pairwise_sharing(mash.model, FUN = abs)
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]

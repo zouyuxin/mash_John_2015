@@ -1,7 +1,7 @@
 ---
 title: "Count 18 Mash - IndRanBayes - EE"
 author: "Yuxin Zou"
-date: 2018-4-16
+date: 2018-11-1
 output: 
   html_document:
     code_folding: hide
@@ -79,12 +79,13 @@ fmodel = flash(Z.center, var_type = 'constant', greedy = TRUE, backfit = TRUE, v
 factors = fmodel$ldf$f
 row.names(factors) = colnames(mash.data.diff$Bhat)
 pve.order = order(fmodel$pve, decreasing = TRUE)
-
+png('~/Documents/GitHub/MASH_baseline/figures/John18_flash_Factors.png', width = 700, height = 500)
 par(mfrow=c(2,2))
 for(i in pve.order){
-  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
+  barplot(factors[,i], main=paste0('Factor ',i, ' PVE = ', round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
 }
 par(mfrow=c(1,1))
+dev.off()
 ```
 
 `flash` on the loading:
@@ -96,31 +97,10 @@ flmodel = flash(loading, greedy = TRUE, backfit = TRUE, var_type = 'constant', v
 
 The flash prefers the rank 0 model. There is no hidden structure in the loading matrix.
 
-Cluster loadings:
-```{r cluster loading}
-mod = Mclust(loading, 1:20)
-summary(mod$BIC)
-```
-
-Using clustering result to fit `mash`:
-
-$$l_{i}\sim \sum_{j=1}^{m}N(\mu_{j}, \Sigma_{j})$$
-We estimate the covariance as $F(\Sigma_j + \mu_{j}\mu_{j}')F'$.
 ```{r cov from flash}
-U_list = alply(mod$parameters$variance$sigma,3)
-mu_list = alply(mod$parameters$mean,2)
-ll = list()
-for (i in 1:length(U_list)){
-  ll[[i]] = U_list[[i]] + mu_list[[i]] %*% t(mu_list[[i]])
-}
-
-Factors = fmodel$ldf$f
-U.loading = lapply(ll, function(U){Factors %*% (U %*% t(Factors))})
-names(U.loading) = paste0('Load', "_", (1:length(U.loading)))
-
 # rank 1
 Flash_res = fmodel$fitted_values
-U.Flash = c(mashr::cov_from_factors(t(as.matrix(Factors)), "Flash"), 
+U.Flash = c(mashr::cov_from_factors(t(as.matrix(factors)), "Flash"), 
             list("tFlash" = t(Flash_res) %*% Flash_res / nrow(Z.center)))
 ```
 
@@ -136,23 +116,23 @@ U.c = cov_canonical(mash_set_data(Z.center))
 
 Extreme Deconvolution
 ```{r ED, eval=FALSE}
-U.dd = c(U.pca, U.loading, U.Flash, list('XX' = t(Z.center) %*% Z.center / nrow(Z.center)))
+U.dd = c(U.pca, U.Flash, list('XX' = t(Z.center) %*% Z.center / nrow(Z.center)))
 
-saveRDS(cov_ed(mash.data.diff, U.dd, subset = strong), '../output/Count18_IndRanBayes_MashEE_Cov.rds')
+saveRDS(cov_ed(mash.data.diff, U.dd, subset = strong), '../output/Count18_IndRanBayes_MashEE_Cov_NOMclust.rds')
 ```
 
 ## Mash model:
 ```{r}
-U.ed = readRDS('../output/Count18_IndRanBayes_MashEE_Cov.rds')
+U.ed = readRDS('../output/Count18_IndRanBayes_MashEE_Cov_NOMclust.rds')
 ```
 
 ```{r mash, eval=FALSE}
-saveRDS(mash(mash.data.diff, c(U.c, U.ed), algorithm.version = 'R'), '../output/Count18_IndRanBayes_mash_model_EE.rds') 
+saveRDS(mash(mash.data.diff, c(U.c, U.ed), algorithm.version = 'R'), '../output/Count18_IndRanBayes_mash_model_EE_NOMclust.rds') 
 ```
 
 # Result
 ```{r}
-mash.model = readRDS('../output/Count18_IndRanBayes_mash_model_EE.rds')
+mash.model = readRDS('../output/Count18_IndRanBayes_mash_model_EE_NOMclust.rds')
 ```
 
 The log-likelihood of fit is
@@ -165,47 +145,38 @@ options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 ```
 
-Check Load_6 covariance matrix
+Check Flash 1 covariance matrix
 
 ```{r Load6}
-x           <- mash.model$fitted_g$Ulist[["ED_Load_6"]]
-colnames(x) <- colnames(beta_class)[2:9]
+x           <- mash.model$fitted_g$Ulist[["ED_Flash_1"]]
+colnames(x) <- colnames(mash.data.diff$Bhat)
+rownames(x) <- colnames(x)
+png('~/Documents/GitHub/MASH_baseline/figures/John18CovFactor1.png', width = 500, height=500)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
+dev.off()
+```
+
+Check tFlash covariance matrix
+
+```{r tFlash}
+x           <- mash.model$fitted_g$Ulist[["ED_tFlash"]]
+colnames(x) <- colnames(mash.data.diff$Bhat)
 rownames(x) <- colnames(x)
 corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
 ```
-
+<!--
 ```{r Load6 pca}
 layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_6"]])
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_Flash_1"]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load 6"))
+          las = 2, main = paste0("EigenVector ", j, " for ED_Flash_1"))
 ```
-
-Check Load_8 covariance matrix
-
-```{r Load8}
-x           <- mash.model$fitted_g$Ulist[["ED_Load_8"]]
-colnames(x) <- colnames(beta_class)[2:9]
-rownames(x) <- colnames(x)
-corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
-```
-
-```{r Load8 pca}
-layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_Load_8"]])
-v = svd.out$v
-colnames(v) = colnames(beta_class)[-1]
-rownames(v) = colnames(v)
-options(repr.plot.width=10, repr.plot.height=5)
-for (j in 1:4)
-  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for Load 8"))
-```
+-->
 
 Both matrices represent that deviations are shared in sign among conditions. The deviations in Yers and Salm are strongest, but weaker in BCG and RV+.
 
@@ -218,9 +189,11 @@ x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]
 rownames(x) <- colnames(x)
+png(filename = '~/Documents/GitHub/MASH_baseline/figures/John18PS_Mag.png', width=500, height = 500)
 corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
                                "#E0F3F8","#91BFDB","#4575B4")))(40),
-               tl.cex=1.2)
+               tl.cex=1.2, title = 'Pairwise Sharing by Magnitude', mar = c(4,0,4,0))
+dev.off()
 ```
 
 Check pairwise sharing by sign:
@@ -230,11 +203,48 @@ x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]
 rownames(x) <- colnames(x)
+png(filename = '~/Documents/GitHub/MASH_baseline/figures/John18PS_Sign.png', width=500, height = 500)
 corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
                                "#E0F3F8","#91BFDB","#4575B4")))(40),
-               tl.cex=1.2)
+               tl.cex=1.2, title = 'Pairwise Sharing by Sign', mar = c(4,0,4,0))
+dev.off()
 ```
 
+Sample from posterior:
+
+```{r}
+mash.model.sample = mash.model
+mash.model.sample$result = mash_compute_posterior_matrices(mash.model, mash.data.diff, algorithm.version = 'R', posterior_samples = 500)
+saveRDS(mash.model.sample, '../output/Count18_IndRanBayes_mash_model_EE_NOMclust_samples.rds')
+```
+
+```{r}
+mash.model.sample = readRDS('../output/Count18_IndRanBayes_mash_model_EE_NOMclust_samples.rds')
+```
+
+Propotion of gene sharing sign
+```{r}
+x = get_pairwise_sharing_from_samples(mash.model.sample, factor = 0)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+png(filename = '~/Documents/GitHub/MASH_baseline/figures/John18PS_Sample_Sig_Sign.png', width=500, height = 500)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45, title = 'Pairwise Sharing by Sign', mar = c(4,0,4,0), col=colorRampPalette(c("blue","white","red"))(200))
+dev.off()
+```
+
+Propotion of gene sharing magnitude
+```{r}
+x = get_pairwise_sharing_from_samples(mash.model.sample, factor = 0.5)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+png(filename = '~/Documents/GitHub/MASH_baseline/figures/John18PS_Sample_Sig_Mag.png', width=500, height = 500)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45, title = 'Pairwise Sharing by Magnitude', mar = c(4,0,4,0), col=colorRampPalette(c("blue","white","red"))(200))
+dev.off()
+```
 # Session information
 
 <!-- Insert the session information into the document -->
