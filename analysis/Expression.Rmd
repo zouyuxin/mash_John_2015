@@ -1,0 +1,83 @@
+---
+title: "Expression"
+author: "Yuxin Zou"
+date: 2020-12-9
+output: 
+  html_document:
+    code_folding: hide
+---
+
+We use John's data at time point 18.
+
+```{r}
+library(limma)
+```
+
+```{r input-counts}
+dat_cpm <- read.table("../data/table-s1.txt", header = TRUE, sep = "\t",
+                      stringsAsFactors = FALSE)
+# The first two columns are gene information
+rownames(dat_cpm) <- dat_cpm$id
+gene_names <- dat_cpm$name
+names(gene_names) <- dat_cpm$id
+dat_cpm[, c("id", "name")] <- list(NULL)
+dat_cpm <- as.matrix(dat_cpm)
+```
+
+```{r input-metadata}
+anno <- read.table("../data/annotation.txt", header = TRUE,
+                   stringsAsFactors = FALSE)
+# Order the bacteria
+anno$bact <- ordered(anno$bact, levels = c("none", "Rv", "Rv+", "GC", "BCG",
+                                           "Smeg", "Yers", "Salm", "Staph"))
+anno$time <- factor(anno$time, levels = c(4, 18, 48))
+```
+
+
+Prepare the factors for use in the linear model.
+
+```{r annotation}
+groups <- anno[, c("ind", "bact", "time", "extr", "rin")]
+groups$bact <- gsub("\\+", "plus", groups$bact)
+groups$ind <- factor(groups$ind)
+groups$bact <- factor(groups$bact, levels = c("none", "Rv", "Rvplus", "GC",
+                                              "BCG", "Smeg", "Yers", "Salm",
+                                              "Staph"))
+groups$time <- factor(groups$time, levels = c(4, 18, 48))
+groups$extr <- factor(groups$extr)
+head(groups)
+```
+
+Prepare model
+
+```{r}
+design <- model.matrix(~ bact-1, data = groups)
+# Clean up names of design matrix
+colnames(design) <- gsub("bact", "", colnames(design))
+
+beta_class <- matrix(0, nrow(dat_cpm), ncol(design));
+sebeta_class <- matrix(0, nrow(dat_cpm), ncol(design))
+t_class = matrix(0, nrow(dat_cpm), ncol(design))
+df_class = matrix(0, nrow(dat_cpm), ncol(design))
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
+
+for(k in c(1:9)){
+  name=levels(groups$bact)[k]
+  samplesk=which(groups$time=="18"&groups$bact==name)
+  model_mat_temp <- design[samplesk,k]
+  l=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+  fit<-eBayes(l)
+  beta_class[,k] <- fit$coefficients;
+  sebeta_class[,k] <- fit$stdev.unscaled * sqrt(fit$s2.post)
+  t_class[,k] = fit$t
+  df_class[,k] = fit$df.total
+}
+```
+
+```{r}
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), '../output/Expression_john.rds')
+```
+
+
+
+
