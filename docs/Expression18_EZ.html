@@ -12,7 +12,7 @@
 <meta name="author" content="Yuxin Zou" />
 
 
-<title>Expression 18 Mash - EE</title>
+<title>Expression 18 Mash - EZ</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -405,7 +405,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Expression 18 Mash - EE</h1>
+<h1 class="title toc-ignore">Expression 18 Mash - EZ</h1>
 <h4 class="author">Yuxin Zou</h4>
 <h4 class="date">2020-12-9</h4>
 
@@ -424,16 +424,16 @@ df_class = data$df</code></pre>
 <div id="mash" class="section level1">
 <h1>Mash</h1>
 <p>Set mash data object</p>
-<pre class="r"><code>mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = df_class)</code></pre>
+<pre class="r"><code>mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = df_class, alpha=1)</code></pre>
 <pre><code>## Warning in if (!is.infinite(df)) {: the condition has length &gt; 1 and only the
 ## first element will be used</code></pre>
 <pre class="r"><code>mash.data.L = mash_update_data(mash.data, ref = &#39;none&#39;)</code></pre>
 <p>Top genes:</p>
 <pre class="r"><code># find strong genes
-m.1by1 = mash_1by1(mash.data.L, alpha=0)
+m.1by1 = mash_1by1(mash.data.L, alpha=1)
 strong = get_significant_results(m.1by1)
 
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], df = df_class[strong,])</code></pre>
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], df = df_class[strong,], alpha=1)</code></pre>
 <pre><code>## Warning in if (!is.infinite(df)) {: the condition has length &gt; 1 and only the
 ## first element will be used</code></pre>
 <pre class="r"><code>data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
@@ -447,11 +447,11 @@ fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)</code></pre>
 row.names(factors) = colnames(beta_class)[2:9]
 pve.order = order(fmodel$pve, decreasing = TRUE)
 
-par(mfrow=c(2,3))
+par(mfrow=c(1,3))
 for(i in pve.order){
   barplot(factors[,i], main=paste0(&#39;Factor &#39;,i, &#39; pve= &#39;, round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
 }</code></pre>
-<p><img src="Expression18_EE_files/figure-html/flash%20plot-1.png" width="672" /></p>
+<p><img src="Expression18_EZ_files/figure-html/flash%20plot-1.png" width="672" /></p>
 <pre class="r"><code>par(mfrow=c(1,1))</code></pre>
 <pre class="r"><code>Factors = fmodel$ldf$f
 Flash_res = flash_get_fitted_values(fmodel)
@@ -465,47 +465,30 @@ U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), &quot;Flash&quot;),
 <pre class="r"><code>X.center = apply(data.strong.L$Bhat, 2, function(x) x - mean(x))
 U.dd = c(U.pca, U.Flash, list(&#39;XX&#39; = t(X.center) %*% X.center / nrow(X.center)))
 
-saveRDS(cov_ed(data.strong.L, U.dd), &#39;../output/Expression18_EE_ED.rds&#39;)</code></pre>
+saveRDS(cov_ed(data.strong.L, U.dd), &#39;../output/Expression18_EZ_ED.rds&#39;)</code></pre>
 </div>
 <div id="mash-model" class="section level2">
 <h2>Mash model:</h2>
-<pre class="r"><code>U.ed = readRDS(&#39;../output/Expression18_EE_ED.rds&#39;)</code></pre>
-<pre class="r"><code>saveRDS(mash(mash.data.L, c(U.c, U.ed)), &#39;../output/Expression18_EE_mash_model.rds&#39;) </code></pre>
+<pre class="r"><code>U.ed = readRDS(&#39;../output/Expression18_EZ_ED.rds&#39;)</code></pre>
+<pre class="r"><code>saveRDS(mash(mash.data.L, c(U.c, U.ed)), &#39;../output/Expression18_EZ_mash_model.rds&#39;) </code></pre>
 </div>
 </div>
 <div id="result" class="section level1">
 <h1>Result</h1>
-<pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_EE_mash_model.rds&#39;)</code></pre>
+<pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_EZ_mash_model.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -96216.69</code></pre>
+<pre><code>## [1] -124868.5</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>There are 1478 diferentially expressed genes.</p>
-<p>Check tFlash covariance matrix</p>
-<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]]
-colnames(x) &lt;- colnames(beta_class)[2:9]
-rownames(x) &lt;- colnames(x)
-corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/tFlash-1.png" width="672" /></p>
-<pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]])
-v = svd.out$v
-colnames(v) = colnames(beta_class)[-1]
-rownames(v) = colnames(v)
-options(repr.plot.width=10, repr.plot.height=5)
-for (j in 1:4)
-  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for ED_tFlash&quot;))</code></pre>
-<p><img src="Expression18_EE_files/figure-html/tFLASH%20pca-1.png" width="672" /></p>
+<p><img src="Expression18_EZ_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Check tPCA covariance matrix</p>
 <pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tPCA&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
 corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/tPCA-1.png" width="672" /></p>
+<p><img src="Expression18_EZ_files/figure-html/tPCA-1.png" width="672" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
 svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tPCA&quot;]])
 v = svd.out$v
@@ -515,7 +498,8 @@ options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
           las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for ED_tPCA&quot;))</code></pre>
-<p><img src="Expression18_EE_files/figure-html/tPCA%20pca-1.png" width="672" /></p>
+<p><img src="Expression18_EZ_files/figure-html/tPCA%20pca-1.png" width="672" /></p>
+<p>There are 510 diferentially expressed genes.</p>
 <p>Check pairwise sharing by magnitude and sign:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model)
 x[x &gt; 1]    &lt;- 1
@@ -525,7 +509,7 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/sharingMagSign-1.png" width="672" /> Check pairwise sharing by magnitude:</p>
+<p><img src="Expression18_EZ_files/figure-html/sharingMagSign-1.png" width="672" /> Check pairwise sharing by magnitude:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model, FUN = abs)
 x[x &gt; 1]    &lt;- 1
 x[x &lt; -1]   &lt;- -1
@@ -534,7 +518,7 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/shareMag-1.png" width="672" /></p>
+<p><img src="Expression18_EZ_files/figure-html/shareMag-1.png" width="672" /></p>
 <p>Check pairwise sharing by sign:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model, factor=0)
 x[x &gt; 1]    &lt;- 1
@@ -544,7 +528,7 @@ rownames(x) &lt;- colnames(x)
 corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upper.col=colorRampPalette(rev(c(&quot;#D73027&quot;,&quot;#FC8D59&quot;,&quot;#FEE090&quot;,&quot;#FFFFBF&quot;,
                                &quot;#E0F3F8&quot;,&quot;#91BFDB&quot;,&quot;#4575B4&quot;)))(40),
                tl.cex=1.2)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/shareSign-1.png" width="672" /> # Session information</p>
+<p><img src="Expression18_EZ_files/figure-html/shareSign-1.png" width="672" /> # Session information</p>
 <!-- Insert the session information into the document -->
 </div>
 
