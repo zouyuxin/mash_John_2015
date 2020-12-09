@@ -1,11 +1,21 @@
 ---
 title: "Home"
 output:
-  html_document:
+  workflowr::wflow_site:
     toc: false
 ---
 
 Application of `mash` on Blischak, John D., et al. "Mycobacterial infection induces a specific human innate immune response." Scientific reports 5 (2015).
+
+Using John's data:
+
+* [Expression](Expression.html)
+
+* [Mash model - EE](Expression18_EE.html)
+
+* [Mash model - EZ](Expression18_EZ.html)
+
+--------------------------------------------------------------
 
 John treated the individual effect as fixed in the model. Here we implement `mash` with indiviudal as random
 
