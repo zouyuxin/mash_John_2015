@@ -1,0 +1,197 @@
+---
+title: "Expression 18 Mash - EE"
+author: "Yuxin Zou"
+date: 2020-12-9
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r packages}
+library(limma); library(mashr); library(plyr);
+library(flashr); library(colorRamps); library(corrplot)
+```
+
+Implement `mash` on John's data at time point 18.
+
+```{r data}
+data = readRDS('../output/Expression_john.rds')
+beta_class = data$beta
+sebeta_class = data$sebeta
+df_class = data$df
+```
+
+# Mash
+
+Set mash data object
+```{r mash.data}
+mash.data = mash_set_data(Bhat = beta_class, Shat = sebeta_class, df = df_class)
+mash.data.L = mash_update_data(mash.data, ref = 'none')
+```
+
+Top genes:
+```{r top genes}
+# find strong genes
+m.1by1 = mash_1by1(mash.data.L, alpha=0)
+strong = get_significant_results(m.1by1)
+
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], df = df_class[strong,])
+data.strong.L = mash_update_data(data.strong, ref = 'none')
+```
+
+## Estimate covariance structures:
+
+Data Driven:
+
+Flash:
+```{r flash, message=FALSE}
+flash.data = flash_set_data(data.strong.L$Bhat)
+fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
+```
+
+```{r flash plot}
+factors = flash_get_ldf(fmodel)$f
+row.names(factors) = colnames(beta_class)[2:9]
+pve.order = order(fmodel$pve, decreasing = TRUE)
+
+par(mfrow=c(2,3))
+for(i in pve.order){
+  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
+}
+par(mfrow=c(1,1))
+```
+
+```{r cov from flash}
+Factors = fmodel$ldf$f
+Flash_res = flash_get_fitted_values(fmodel)
+U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), "Flash"), 
+            list("tFlash" = t(Flash_res) %*% Flash_res / nrow(Flash_res)))
+```
+
+PCA:
+```{r pca}
+U.pca = cov_pca(data.strong.L, 3)
+```
+
+Canonical
+```{r Canonical}
+U.c = cov_canonical(data.strong.L)
+```
+
+Extreme Deconvolution
+```{r ED, eval=FALSE}
+X.center = apply(data.strong.L$Bhat, 2, function(x) x - mean(x))
+U.dd = c(U.pca, U.Flash, list('XX' = t(X.center) %*% X.center / nrow(X.center)))
+
+saveRDS(cov_ed(data.strong.L, U.dd), '../output/Expression18_EE_ED.rds')
+```
+
+## Mash model:
+```{r}
+U.ed = readRDS('../output/Expression18_EE_ED.rds')
+```
+
+```{r mash, eval=FALSE}
+saveRDS(mash(mash.data.L, c(U.c, U.ed)), '../output/Expression18_EE_mash_model.rds') 
+```
+
+# Result
+```{r}
+mash.model = readRDS('../output/Expression18_EE_mash_model.rds')
+```
+
+The log-likelihood of fit is
+```{r} 
+get_loglik(mash.model)
+```
+Here is a plot of weights learned:
+```{r}
+options(repr.plot.width=12, repr.plot.height=4)
+barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
+```
+
+There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
+
+Check tFlash covariance matrix
+
+```{r tFlash}
+x           <- mash.model$fitted_g$Ulist[["ED_tFlash"]]
+colnames(x) <- colnames(beta_class)[2:9]
+rownames(x) <- colnames(x)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
+```
+
+```{r tFLASH pca}
+layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_tFlash"]])
+v = svd.out$v
+colnames(v) = colnames(beta_class)[-1]
+rownames(v) = colnames(v)
+options(repr.plot.width=10, repr.plot.height=5)
+for (j in 1:4)
+  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
+          las = 2, main = paste0("EigenVector ", j, " for ED_tFlash"))
+```
+
+Check tPCA covariance matrix
+
+```{r tPCA}
+x           <- mash.model$fitted_g$Ulist[["ED_tPCA"]]
+colnames(x) <- colnames(beta_class)[2:9]
+rownames(x) <- colnames(x)
+corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45)
+```
+
+```{r tPCA pca}
+layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_tPCA"]])
+v = svd.out$v
+colnames(v) = colnames(beta_class)[-1]
+rownames(v) = colnames(v)
+options(repr.plot.width=10, repr.plot.height=5)
+for (j in 1:4)
+  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
+          las = 2, main = paste0("EigenVector ", j, " for ED_tPCA"))
+```
+
+There are `r length(get_significant_results(mash.model))` diferentially expressed genes.
+
+Check pairwise sharing by magnitude and sign:
+```{r sharingMagSign}
+x = get_pairwise_sharing(mash.model)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(40),
+               tl.cex=1.2)
+```
+Check pairwise sharing by magnitude:
+```{r shareMag}
+x = get_pairwise_sharing(mash.model, FUN = abs)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(40),
+               tl.cex=1.2)
+```
+
+Check pairwise sharing by sign:
+```{r shareSign}
+x = get_pairwise_sharing(mash.model, factor=0)
+x[x > 1]    <- 1
+x[x < -1]   <- -1
+colnames(x) <- colnames(beta_class)[-1]
+rownames(x) <- colnames(x)
+corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(40),
+               tl.cex=1.2)
+```
+# Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
