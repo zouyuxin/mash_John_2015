@@ -55,11 +55,10 @@ design <- model.matrix(~ bact-1, data = groups)
 # Clean up names of design matrix
 colnames(design) <- gsub("bact", "", colnames(design))
 
-beta_class <- matrix(0, nrow(dat_cpm), ncol(design));
-sebeta_class <- matrix(0, nrow(dat_cpm), ncol(design))
-t_class = matrix(0, nrow(dat_cpm), ncol(design))
-df_class = matrix(0, nrow(dat_cpm), ncol(design))
-colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
+beta_class <- c()
+sebeta_class <- c()
+t_class = c()
+df_class = c()
 
 for(k in c(1:9)){
   name=levels(groups$bact)[k]
@@ -67,11 +66,12 @@ for(k in c(1:9)){
   model_mat_temp <- design[samplesk,k]
   l=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
   fit<-eBayes(l)
-  beta_class[,k] <- fit$coefficients;
-  sebeta_class[,k] <- fit$stdev.unscaled * sqrt(fit$s2.post)
-  t_class[,k] = fit$t
-  df_class[,k] = fit$df.total
+  beta_class <- cbind(beta_class, fit$coefficients)
+  sebeta_class <- cbind(sebeta_class, fit$stdev.unscaled * sqrt(fit$s2.post))
+  t_class = cbind(t_class, fit$t)
+  df_class = cbind(df_class, fit$df.total)
 }
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
 ```
 
 ```{r}
