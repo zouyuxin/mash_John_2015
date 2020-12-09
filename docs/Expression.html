@@ -450,11 +450,10 @@ head(groups)</code></pre>
 # Clean up names of design matrix
 colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
 
-beta_class &lt;- matrix(0, nrow(dat_cpm), ncol(design));
-sebeta_class &lt;- matrix(0, nrow(dat_cpm), ncol(design))
-t_class = matrix(0, nrow(dat_cpm), ncol(design))
-df_class = matrix(0, nrow(dat_cpm), ncol(design))
-colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
+beta_class &lt;- c()
+sebeta_class &lt;- c()
+t_class = c()
+df_class = c()
 
 for(k in c(1:9)){
   name=levels(groups$bact)[k]
@@ -462,11 +461,12 @@ for(k in c(1:9)){
   model_mat_temp &lt;- design[samplesk,k]
   l=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
   fit&lt;-eBayes(l)
-  beta_class[,k] &lt;- fit$coefficients;
-  sebeta_class[,k] &lt;- fit$stdev.unscaled * sqrt(fit$s2.post)
-  t_class[,k] = fit$t
-  df_class[,k] = fit$df.total
-}</code></pre>
+  beta_class &lt;- cbind(beta_class, fit$coefficients)
+  sebeta_class &lt;- cbind(sebeta_class, fit$stdev.unscaled * sqrt(fit$s2.post))
+  t_class = cbind(t_class, fit$t)
+  df_class = cbind(df_class, fit$df.total)
+}
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)</code></pre>
 <pre class="r"><code>saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john.rds&#39;)</code></pre>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
