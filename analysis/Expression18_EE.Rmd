@@ -178,7 +178,7 @@ dev.off()
 
 Check pairwise sharing by magnitude and sign:
 ```{r sharingMagSign}
-x = get_pairwise_sharing(mash.model, factor = 0.8)
+x = get_pairwise_sharing(mash.model)
 x[x > 1]    <- 1
 x[x < -1]   <- -1
 colnames(x) <- colnames(beta_class)[-1]
@@ -213,6 +213,7 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPa
 
 ## Genes
 
+Yers-Salm cluster in Cormotif.
 ```{r YSgene1}
 # before
 gene1177 = data.frame(mash.data.L$Bhat[1177,])
@@ -241,6 +242,7 @@ p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1)
 ```
 
+Yers-Salm cluster in Cormotif.
 ```{r YSgene2}
 # before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
@@ -269,8 +271,8 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1)
 ```
 
+All in Cormofit.
 ```{r allgene1}
-which(rownames(beta_class) == 'ENSG00000006015')
 # before
 gene93 = data.frame(mash.data.L$Bhat[93,])
 colnames(gene93) = 'Deviations'
@@ -284,13 +286,13 @@ gene93.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm'
 gene93.post$se = mash.model$result$PosteriorSD[93,]
 
 p.orig = ggplot(gene93, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-8,3) +
+  geom_point() + ylim(-6,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000006015 original' )
 
 p.post = ggplot(gene93.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-8, 3) +
+  geom_point() + ylim(-6, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000006015 mash')
@@ -298,8 +300,8 @@ p.post = ggplot(gene93.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1)
 ```
 
+All in Cormofit.
 ```{r allgene2}
-which(rownames(beta_class) == 'ENSG00000196639')
 # before
 gene11445 = data.frame(mash.data.L$Bhat[11445,])
 colnames(gene11445) = 'Deviations'
@@ -316,19 +318,19 @@ p.orig = ggplot(gene11445, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(0,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000006015 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000196639 original' )
 
 p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(0, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000006015 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none") + coord_flip() + ggtitle('ENSG00000196639 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1)
 ```
 
+All in Cormofit.
 ```{r allgene3}
-which(rownames(beta_class) == 'ENSG00000105497')
 # before
 gene2481 = data.frame(mash.data.L$Bhat[2481,])
 colnames(gene2481) = 'Deviations'
