@@ -584,16 +584,16 @@ p.orig = ggplot(gene1177, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(-1,2.5) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000079335 original&#39; )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000079335 original&#39; )
 
 p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(-1,2.5) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000079335 mash&#39;)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000079335 mash&#39;)
 
-ggarrange(p.orig, p.post, ncol=2, nrow=1)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/YSgene1-1.png" width="672" /></p>
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_files/figure-html/YSgene1-1.png" width="960" /></p>
 <p>Yers-Salm cluster in Cormotif.</p>
 <pre class="r"><code># before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
@@ -611,16 +611,16 @@ p.orig = ggplot(gene7637, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(-8,3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000158488 original&#39; )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000158488 original&#39; )
 
 p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(-8, 3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000158488 mash&#39;)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000158488 mash&#39;)
 
-ggarrange(p.orig, p.post, ncol=2, nrow=1)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/YSgene2-1.png" width="672" /></p>
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_files/figure-html/YSgene2-1.png" width="960" /></p>
 <p>All in Cormofit.</p>
 <pre class="r"><code># before
 gene93 = data.frame(mash.data.L$Bhat[93,])
@@ -638,16 +638,16 @@ p.orig = ggplot(gene93, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(-6,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000006015 original&#39; )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000006015 original&#39; )
 
 p.post = ggplot(gene93.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(-6, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000006015 mash&#39;)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000006015 mash&#39;)
 
-ggarrange(p.orig, p.post, ncol=2, nrow=1)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/allgene1-1.png" width="672" /></p>
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_files/figure-html/allgene1-1.png" width="960" /></p>
 <p>All in Cormofit.</p>
 <pre class="r"><code># before
 gene11445 = data.frame(mash.data.L$Bhat[11445,])
@@ -665,16 +665,16 @@ p.orig = ggplot(gene11445, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(0,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000196639 original&#39; )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000196639 original&#39; )
 
 p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(0, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000196639 mash&#39;)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000196639 mash&#39;)
 
-ggarrange(p.orig, p.post, ncol=2, nrow=1)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/allgene2-1.png" width="672" /></p>
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_files/figure-html/allgene2-1.png" width="960" /></p>
 <p>All in Cormofit.</p>
 <pre class="r"><code># before
 gene2481 = data.frame(mash.data.L$Bhat[2481,])
@@ -692,16 +692,16 @@ p.orig = ggplot(gene2481, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000105497 original&#39; )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000105497 original&#39; )
 
 p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;) + coord_flip() + ggtitle(&#39;ENSG00000105497 mash&#39;)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000105497 mash&#39;)
 
-ggarrange(p.orig, p.post, ncol=2, nrow=1)</code></pre>
-<p><img src="Expression18_EE_files/figure-html/allgene3-1.png" width="672" /></p>
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_files/figure-html/allgene3-1.png" width="960" /></p>
 </div>
 <div id="session-information" class="section level1">
 <h1>Session information</h1>
