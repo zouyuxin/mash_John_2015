@@ -15,27 +15,28 @@ Using John's data:
 
 * [Mash model - EZ](Expression18_EZ.html)
 
+<!--
 --------------------------------------------------------------
 
-John treated the individual effect as fixed in the model. Here we implement `mash` with indiviudal as random
+John treated the individual effect as fixed in the model. Here we processed data with individual as random effect.
 
 # Data
-1. Indivivual as random: [Count_IndRan](Count_IndRanBayes.html)
-2. Indivivual as fixed: [Count_IndFix](Count_IndFixBayes.html)
+1. Individual as random: [Count_IndRan](Count_IndRanBayes.html)
+2. Individual as fixed: [Count_IndFix](Count_IndFixBayes.html)
 
 We focus on the time 18 data only.
 
 # Mash
-1. Indivivual as random EE: [Count18_IndRan_Mash_EE](Count18_Mash_IndRanBayes_EE.html)
-2. Indivivual as random EZ: [Count18_IndRan_Mash_EZ](Count18_Mash_IndRanBayes_EZ.html)
-3. Indivivual as fixed EE: [Count18_IndFix_Mash_EE](Count18_Mash_IndFixBayes_EE.html)
+1. Individual as random EE: [Count18_IndRan_Mash_EE](Count18_Mash_IndRanBayes_EE.html)
+2. Individual as random EZ: [Count18_IndRan_Mash_EZ](Count18_Mash_IndRanBayes_EZ.html)
+3. Individual as fixed EE: [Count18_IndFix_Mash_EE](Count18_Mash_IndFixBayes_EE.html)
 
-The Shat in the data are correponding to a t statistics. We transformed them to Shat from the z statistics. If we didn't do the transformation: [Count18_IndFix_Mash_EET](Count18_Mash_IndFixBayes_EET.html)
+The Shat in the data are corresponding to a t statistics. We transformed them to Shat from the z statistics. If we didn't do the transformation: [Count18_IndFix_Mash_EET](Count18_Mash_IndFixBayes_EET.html)
 
 If we ignore the induced correlation: [Count18_IndRan_Mash_Ignore_EE](Count18_Mash_IndRanBayes_EE_Wrong.html)
 
 # Flash
 1. Flash on C: [Count18_FlashC](Count18_FlashC.html)
 2. Flash on D: [Count18_FlashD](Count18_FlashD.html)
-
+-->
 
