@@ -15,6 +15,13 @@ Using John's data:
 
 * [Mash model - EZ](Expression18_EZ.html)
 
+* [EE on difference](Expression18_EE_diff.html)
+
+* [EE on mean (joint)](Expression18_EE_john_joint.html)
+
+* [EE on difference (joint)](Expression18_EE_john_jointdiff.html)
+
+
 <!--
 --------------------------------------------------------------
 
