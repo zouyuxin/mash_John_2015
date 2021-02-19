@@ -446,6 +446,10 @@ head(groups)</code></pre>
 ## 5 M375 none    4    1 8.8
 ## 6 M372 Smeg   48    1 9.5</code></pre>
 <p>Prepare model</p>
+<div id="different-variance" class="section level2">
+<h2>Different variance</h2>
+<div id="group-means" class="section level3">
+<h3>Group means</h3>
 <pre class="r"><code>design &lt;- model.matrix(~ bact-1, data = groups)
 # Clean up names of design matrix
 colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
@@ -459,15 +463,100 @@ for(k in c(1:9)){
   name=levels(groups$bact)[k]
   samplesk=which(groups$time==&quot;18&quot;&amp;groups$bact==name)
   model_mat_temp &lt;- design[samplesk,k]
-  l=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
-  fit&lt;-eBayes(l)
+  fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+  fit&lt;-eBayes(fit)
   beta_class &lt;- cbind(beta_class, fit$coefficients)
   sebeta_class &lt;- cbind(sebeta_class, fit$stdev.unscaled * sqrt(fit$s2.post))
   t_class = cbind(t_class, fit$t)
-  df_class = cbind(df_class, fit$df.total)
+  df_class = cbind(df_class, fit$df.residual)
 }
-colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)</code></pre>
-<pre class="r"><code>saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john.rds&#39;)</code></pre>
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john.rds&#39;)</code></pre>
+</div>
+<div id="group-differences" class="section level3">
+<h3>Group Differences</h3>
+<p>Prepare <code>groupid</code></p>
+<pre class="r"><code># Create a factor for the experiments, with the levels ordered such that
+# as.numeric converts them to numbers in a defined manner
+group_fac &lt;- factor(paste(anno$bact, anno$time, sep = &quot;.&quot;),
+                    levels = c(&quot;none.4&quot;, &quot;Rv.4&quot;, &quot;Rv+.4&quot;, &quot;GC.4&quot;, &quot;BCG.4&quot;,
+                               &quot;Smeg.4&quot;, &quot;Yers.4&quot;, &quot;Salm.4&quot;, &quot;Staph.4&quot;, &quot;none.18&quot;,
+                               &quot;Rv.18&quot;, &quot;Rv+.18&quot;, &quot;GC.18&quot;, &quot;BCG.18&quot;, &quot;Smeg.18&quot;,
+                               &quot;Yers.18&quot;, &quot;Salm.18&quot;, &quot;Staph.18&quot;, &quot;none.48&quot;,
+                               &quot;Rv.48&quot;, &quot;Rv+.48&quot;, &quot;GC.48&quot;, &quot;BCG.48&quot;, &quot;Smeg.48&quot;,
+                               &quot;Yers.48&quot;, &quot;Salm.48&quot;))
+groupid &lt;- as.numeric(group_fac)</code></pre>
+<p>Prepare <code>compid</code></p>
+<pre class="r"><code>compid &lt;- data.frame(Cond1 = rep(c(1, 10, 19), each = 8),
+                     Cond2 = c(2:9, 11:18, 20:27))
+compid &lt;- compid[-24, ] # Remove last row b/c no 48 hr Staph sample
+compid = compid[9:16, ]
+compnum&lt;-nrow(compid)</code></pre>
+<pre class="r"><code>genenum = nrow(dat_cpm)
+beta_class&lt;-matrix(0,genenum,compnum)
+sebeta_class &lt;- matrix(0,genenum,compnum)
+t_class &lt;- matrix(0,genenum,compnum)
+df_class &lt;- matrix(0,genenum,compnum)
+  
+for(i in 1:compnum) {
+  selid1&lt;-which(groupid == compid[i,1]) 
+  selid2&lt;-which(groupid == compid[i,2])
+  eset&lt;-cbind(dat_cpm[,selid1],dat_cpm[,selid2])
+  g1num&lt;-length(selid1)
+  g2num&lt;-length(selid2)
+  designmat&lt;-cbind(base=rep(1,(g1num+g2num)), delta=c(rep(0,g1num),rep(1,g2num)))
+  fit&lt;-lmFit(eset,designmat)
+  fit&lt;-eBayes(fit)
+  beta_class[,i]&lt;-fit$coefficients[,2]
+  sebeta_class[,i] &lt;- fit$stdev.unscaled[,2] * sqrt(fit$s2.post)
+  t_class[,i] &lt;- fit$t[,2]
+  df_class[,i] &lt;- fit$df.total
+}
+
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;)
+row.names(beta_class)=row.names(sebeta_class)=row.names(df_class)=row.names(t_class)=row.names(dat_cpm)
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john_diff.rds&#39;)</code></pre>
+</div>
+</div>
+<div id="same-variance" class="section level2">
+<h2>Same variance</h2>
+<div id="group-means-1" class="section level3">
+<h3>Group means</h3>
+<pre class="r"><code>design &lt;- model.matrix(~ bact-1, data = groups)
+# Clean up names of design matrix
+colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
+
+samplesk=which(groups$time==&quot;18&quot;)
+model_mat_temp &lt;- design[samplesk,]
+fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+fit&lt;-eBayes(fit)
+
+beta_class = fit$coefficients
+sebeta_class &lt;- fit$stdev.unscaled * sqrt(fit$s2.post)
+t_class &lt;- fit$t
+df_class &lt;- matrix(fit$df.total, nrow = nrow(beta_class), ncol=9)
+
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john_joint.rds&#39;)</code></pre>
+</div>
+<div id="group-differences-1" class="section level3">
+<h3>Group differences</h3>
+<pre class="r"><code>design_diff &lt;- model.matrix(~ bact, data = groups)
+# Clean up names of design matrix
+colnames(design_diff) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design_diff))
+
+samplesk=which(groups$time==&quot;18&quot;)
+model_mat_temp &lt;- design_diff[samplesk,]
+fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+fit&lt;-eBayes(fit)
+
+beta_class = fit$coefficients[,-1]
+sebeta_class &lt;- fit$stdev.unscaled[,-1] * sqrt(fit$s2.post)
+t_class &lt;- fit$t[,-1]
+df_class &lt;- matrix(fit$df.total, nrow=nrow(beta_class), ncol=8)
+
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), &#39;../output/Expression_john_diff_joint.rds&#39;)</code></pre>
+</div>
+</div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
