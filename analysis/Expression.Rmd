@@ -50,7 +50,11 @@ head(groups)
 
 Prepare model
 
-```{r}
+## Different variance
+
+### Group means 
+
+```{r eval=FALSE}
 design <- model.matrix(~ bact-1, data = groups)
 # Clean up names of design matrix
 colnames(design) <- gsub("bact", "", colnames(design))
@@ -64,20 +68,112 @@ for(k in c(1:9)){
   name=levels(groups$bact)[k]
   samplesk=which(groups$time=="18"&groups$bact==name)
   model_mat_temp <- design[samplesk,k]
-  l=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
-  fit<-eBayes(l)
+  fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+  fit<-eBayes(fit)
   beta_class <- cbind(beta_class, fit$coefficients)
   sebeta_class <- cbind(sebeta_class, fit$stdev.unscaled * sqrt(fit$s2.post))
   t_class = cbind(t_class, fit$t)
-  df_class = cbind(df_class, fit$df.total)
+  df_class = cbind(df_class, fit$df.residual)
 }
 colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=colnames(design)
-```
-
-```{r}
 saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), '../output/Expression_john.rds')
 ```
 
+### Group Differences
 
+Prepare `groupid`
+
+```{r}
+# Create a factor for the experiments, with the levels ordered such that
+# as.numeric converts them to numbers in a defined manner
+group_fac <- factor(paste(anno$bact, anno$time, sep = "."),
+                    levels = c("none.4", "Rv.4", "Rv+.4", "GC.4", "BCG.4",
+                               "Smeg.4", "Yers.4", "Salm.4", "Staph.4", "none.18",
+                               "Rv.18", "Rv+.18", "GC.18", "BCG.18", "Smeg.18",
+                               "Yers.18", "Salm.18", "Staph.18", "none.48",
+                               "Rv.48", "Rv+.48", "GC.48", "BCG.48", "Smeg.48",
+                               "Yers.48", "Salm.48"))
+groupid <- as.numeric(group_fac)
+```
+
+Prepare `compid`
+
+```{r}
+compid <- data.frame(Cond1 = rep(c(1, 10, 19), each = 8),
+                     Cond2 = c(2:9, 11:18, 20:27))
+compid <- compid[-24, ] # Remove last row b/c no 48 hr Staph sample
+compid = compid[9:16, ]
+compnum<-nrow(compid)
+```
+
+```{r eval=FALSE}
+genenum = nrow(dat_cpm)
+beta_class<-matrix(0,genenum,compnum)
+sebeta_class <- matrix(0,genenum,compnum)
+t_class <- matrix(0,genenum,compnum)
+df_class <- matrix(0,genenum,compnum)
+  
+for(i in 1:compnum) {
+  selid1<-which(groupid == compid[i,1]) 
+  selid2<-which(groupid == compid[i,2])
+  eset<-cbind(dat_cpm[,selid1],dat_cpm[,selid2])
+  g1num<-length(selid1)
+  g2num<-length(selid2)
+  designmat<-cbind(base=rep(1,(g1num+g2num)), delta=c(rep(0,g1num),rep(1,g2num)))
+  fit<-lmFit(eset,designmat)
+  fit<-eBayes(fit)
+  beta_class[,i]<-fit$coefficients[,2]
+  sebeta_class[,i] <- fit$stdev.unscaled[,2] * sqrt(fit$s2.post)
+  t_class[,i] <- fit$t[,2]
+  df_class[,i] <- fit$df.total
+}
+
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(df_class)=c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph')
+row.names(beta_class)=row.names(sebeta_class)=row.names(df_class)=row.names(t_class)=row.names(dat_cpm)
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), '../output/Expression_john_diff.rds')
+```
+
+## Same variance
+
+### Group means
+
+```{r eval=FALSE}
+design <- model.matrix(~ bact-1, data = groups)
+# Clean up names of design matrix
+colnames(design) <- gsub("bact", "", colnames(design))
+
+samplesk=which(groups$time=="18")
+model_mat_temp <- design[samplesk,]
+fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+fit<-eBayes(fit)
+
+beta_class = fit$coefficients
+sebeta_class <- fit$stdev.unscaled * sqrt(fit$s2.post)
+t_class <- fit$t
+df_class <- matrix(fit$df.total, nrow = nrow(beta_class), ncol=9)
+
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), '../output/Expression_john_joint.rds')
+```
+
+
+### Group differences
+
+```{r eval=FALSE}
+design_diff <- model.matrix(~ bact, data = groups)
+# Clean up names of design matrix
+colnames(design_diff) <- gsub("bact", "", colnames(design_diff))
+
+samplesk=which(groups$time=="18")
+model_mat_temp <- design_diff[samplesk,]
+fit=lmFit(object = dat_cpm[,samplesk],model_mat_temp)
+fit<-eBayes(fit)
+
+beta_class = fit$coefficients[,-1]
+sebeta_class <- fit$stdev.unscaled[,-1] * sqrt(fit$s2.post)
+t_class <- fit$t[,-1]
+df_class <- matrix(fit$df.total, nrow=nrow(beta_class), ncol=8)
+
+saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class), '../output/Expression_john_diff_joint.rds')
+```
 
 
