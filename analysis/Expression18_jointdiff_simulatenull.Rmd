@@ -68,6 +68,7 @@ The FPR is `r fpmash.diff/nrow(b1)`. We check estimated weights:
 ```{r}
 barplot(get_estimated_pi(m1.fit.diff), las=2, cex.names = 0.7)
 ```
+
 Add a small number on the diagonal of priors:
 ```{r}
 U1.ed.diag = lapply(U1.ed, function(U) U + 0.01 * diag(8))
@@ -98,6 +99,7 @@ The FPR is `r fpmash.mean/nrow(b2)`. We check estimated weights:
 ```{r}
 barplot(get_estimated_pi(m2.fit.mean), las=2, cex.names = 0.7)
 ```
+
 Add a small number on the diagonal of priors:
 ```{r}
 U2.ed.diag = lapply(U2.ed, function(U) U + 0.01 * diag(8))
@@ -108,6 +110,17 @@ fpmash.mean.diag = length(get_significant_results(m2.fit.mean.diag))
 The FPR is `r fpmash.mean.diag/nrow(b2)`. We check estimated weights:
 ```{r}
 barplot(get_estimated_pi(m2.fit.mean.diag), las=2, cex.names = 0.7)
+```
+
+If we exclude data-driven priors,
+```{r}
+m2.fit.mean.c = mash(m2.data.L, U2.c)
+fpmash.mean.c = length(get_significant_results(m2.fit.mean.c))
+```
+
+The FPR is `r fpmash.mean.c/nrow(b2)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m2.fit.mean.c), las=2, cex.names = 0.7)
 ```
 
 ## Different permutation for each gene
