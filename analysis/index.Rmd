@@ -21,7 +21,7 @@ Using John's data:
 
 * [EE on difference (joint)](Expression18_EE_john_jointdiff.html)
 
-* [Simulation under null](Expression18_jointdiff_simulatenull.Rmd)
+* [Simulation under null](Expression18_jointdiff_simulatenull.html)
 
 <!--
 --------------------------------------------------------------
