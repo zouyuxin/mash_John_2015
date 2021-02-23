@@ -10,74 +10,170 @@ output:
 ```{r}
 library(limma)
 library(ashr)
+library(mashr)
 ```
 
-The data includes the gene expression data (table_s1) of 12,728 genes from 54 samples infected by 8 different types of bacteria and one non-infected control, measured at 18 hours post-infection. We randomly permute the samples with respect to the condition labels so that there no longer exists association between gene expression levels and conditions. We use the same permutation to all the genes.
+The data includes the gene expression data (table_s1) of 12,728 genes from 54 samples infected by 8 different types of bacteria and one non-infected control, measured at 18 hours post-infection. 
 
-## ash on differential expression with original shat
+## Same permutation for all gene
+
+We randomly permute the samples with respect to the condition labels so that there no longer exists association between gene expression levels and conditions.
 
 ```{r}
 dat = readRDS('../output/Expression_data.rds')
 set.seed(123)
 
-dat_simu = list()
-fp = matrix(NA, nrow=10, ncol=8)
-for(i in 1:10){
+perm = sample(1:54, 54)
+d1 = dat$data[,perm]
+colnames(d1) = colnames(dat$data)
+  
+fit1=lmFit(object = d1, dat$design_diff)
+fit1<-eBayes(fit1)
+b1 = fit1$coefficients[,-1]
+s1 <- fit1$stdev.unscaled[,-1] * sqrt(fit1$s2.post)
+t1 <- fit1$t[,-1]
+df1 <- fit1$df.total
+
+fit2=lmFit(object = d1, dat$design_mean)
+fit2<-eBayes(fit2)
+b2 = fit2$coefficients
+s2 <- fit2$stdev.unscaled * sqrt(fit2$s2.post)
+t2 <- fit2$t
+df2 <- fit2$df.total
+```
+
+Fit ash for each condition:
+```{r}
+m1.data = mash_set_data(b1, s1)
+m1.1by1 = mash_1by1(m1.data)
+fpash = colSums(m1.1by1$result$lfsr < 0.05)
+```
+
+The false positive rates using ash:
+```{r}
+fpash/nrow(d1)
+```
+
+Fit mash on DE data:
+```{r}
+strong1 = get_significant_results(m1.1by1, 0.05)
+U1.pca = cov_pca(m1.data, 5, subset=strong1)
+U1.ed = cov_ed(m1.data, U1.pca, subset=strong1)
+U1.c = cov_canonical(m1.data)
+m1.fit.diff = mash(m1.data, c(U1.c,U1.ed))
+fpmash.diff = length(get_significant_results(m1.fit.diff))
+```
+
+The FPR is `r fpmash.diff/nrow(b1)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m1.fit.diff), las=2, cex.names = 0.7)
+```
+Add a small number on the diagonal of priors:
+```{r}
+U1.ed.diag = lapply(U1.ed, function(U) U + 0.01 * diag(8))
+m1.fit.diff.diag = mash(m1.data, c(U1.c, U1.ed.diag))
+fpmash.diff.diag = length(get_significant_results(m1.fit.diff.diag))
+```
+
+The FPR is `r fpmash.diff.diag/nrow(b1)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m1.fit.diff.diag), las=2, cex.names = 0.7)
+```
+
+Fit mash common baseline:
+```{r}
+m2.data = mash_set_data(b2, s2)
+m2.data.L = mash_update_data(m2.data, ref='none')
+m2.1by1 = mash_1by1(m2.data.L)
+strong2 = get_significant_results(m2.1by1, 0.05)
+U2.pca = cov_pca(m2.data.L, 5, subset=strong2)
+U2.ed = cov_ed(m2.data.L, U2.pca, subset=strong2)
+U2.c = cov_canonical(m2.data.L)
+
+m2.fit.mean = mash(m2.data.L, c(U2.c,U2.ed))
+fpmash.mean = length(get_significant_results(m2.fit.mean))
+```
+
+The FPR is `r fpmash.mean/nrow(b2)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m2.fit.mean), las=2, cex.names = 0.7)
+```
+Add a small number on the diagonal of priors:
+```{r}
+U2.ed.diag = lapply(U2.ed, function(U) U + 0.01 * diag(8))
+m2.fit.mean.diag = mash(m2.data.L, c(U2.c, U2.ed.diag))
+fpmash.mean.diag = length(get_significant_results(m2.fit.mean.diag))
+```
+
+The FPR is `r fpmash.mean.diag/nrow(b2)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m2.fit.mean.diag), las=2, cex.names = 0.7)
+```
+
+## Different permutation for each gene
+
+We use independent and different permutation to each gene.
+
+```{r}
+dat = readRDS('../output/Expression_data.rds')
+set.seed(123)
+d2 = dat$data
+for(i in 1:nrow(dat$data)){
   perm = sample(1:54, 54)
-  
-  d1 = dat$data[,perm]
-  colnames(d1) = colnames(dat$data)
-  dat_simu[[i]] = d1
-  fit1=lmFit(object = d1, dat$design_diff)
-  fit1<-eBayes(fit1)
-  
-  b1 = fit1$coefficients[,-1]
-  s1 <- fit1$stdev.unscaled[,-1] * sqrt(fit1$s2.post)
-  t1 <- fit1$t[,-1]
-  df1 <- fit1$df.total
-  
-  for(j in 1:8){
-    m1 = ash(b1[,j], s1[,j],mixcompdist="normal", alpha=0, lik=lik_normal())
-    fp[i,j] = sum(m1$result$lfsr < 0.05)
-  }
+  d2[i,] = d2[i,perm]
 }
-fp/nrow(dat$data)
+
+fit3=lmFit(object = d2, dat$design_diff)
+fit3<-eBayes(fit3)
+b3 = fit3$coefficients[,-1]
+s3 <- fit3$stdev.unscaled[,-1] * sqrt(fit3$s2.post)
+t3 <- fit3$t[,-1]
+df3 <- fit3$df.total
+
+fit4=lmFit(object = d2, dat$design_mean)
+fit4<-eBayes(fit4)
+b4 = fit4$coefficients
+s4 <- fit4$stdev.unscaled * sqrt(fit4$s2.post)
+t4 <- fit4$t
+df4 <- fit4$df.total
 ```
 
-## ash on differential expression with adjusted shat
-
+Fit ash for each condition:
 ```{r}
-### take the function from mouthwash to calibrate shat
-adjust_by_t <- function(betahat, sebetahat, df) {
-  
-  ## Convert t to z --------------------------------------
-  zstats <- stats::qnorm(stats::pt(q = betahat / sebetahat, df = df))
-  snew <- betahat / zstats
-  
-  return(snew)
-}
+m3.data = mash_set_data(b3, s3)
+m3.1by1 = mash_1by1(m3.data)
+fpash.g = colSums(m3.1by1$result$lfsr < 0.05)
 ```
 
+The false positive rates using ash:
 ```{r}
-fpa = matrix(NA, nrow=10, ncol=8)
-for(i in 1:10){
-  
-  d2 = dat_simu[[i]]
-  fit2=lmFit(object = d2, dat$design_diff)
-  fit2<-eBayes(fit2)
-  
-  b2 = fit2$coefficients[,-1]
-  s2 <- fit2$stdev.unscaled[,-1] * sqrt(fit2$s2.post)
-  t2 <- fit2$t[,-1]
-  df2 <- fit2$df.total
-  
-  s2.adj = adjust_by_t(b2, s2, df=df2)
-  
-  for(j in 1:8){
-    m2 = ash(b2[,j], s2.adj[,j],mixcompdist="normal", alpha=0, lik=lik_normal())
-    fpa[i,j] = sum(m2$result$lfsr < 0.05)
-  }
-}
-fpa/nrow(dat$data)
+fpash.g/nrow(d2)
+```
+
+Fit mash on DE data:
+```{r}
+U3.c = cov_canonical(m3.data)
+m3.fit.diff = mash(m3.data, U3.c)
+fpmash.diff.g = length(get_significant_results(m3.fit.diff))
+```
+
+The FPR is `r fpmash.diff.g/nrow(d2)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m3.fit.diff), las=2, cex.names = 0.7)
+```
+
+Fit mash common baseline:
+```{r}
+m4.data = mash_set_data(b4, s4)
+m4.data.L = mash_update_data(m4.data, ref='none')
+m4.1by1 = mash_1by1(m4.data.L)
+U4.c = cov_canonical(m4.data.L)
+m4.fit.mean = mash(m4.data.L, U4.c)
+fpmash.mean.g = length(get_significant_results(m4.fit.mean))
+```
+
+The FPR is `r fpmash.mean.g/nrow(b2)`. We check estimated weights:
+```{r}
+barplot(get_estimated_pi(m4.fit.mean), las=2, cex.names = 0.7)
 ```
 
