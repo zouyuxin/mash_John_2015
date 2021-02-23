@@ -413,111 +413,166 @@ div.section {
 
 
 <pre class="r"><code>library(limma)
-library(ashr)</code></pre>
-<p>The data includes the gene expression data (table_s1) of 12,728 genes from 54 samples infected by 8 different types of bacteria and one non-infected control, measured at 18 hours post-infection. We randomly permute the samples with respect to the condition labels so that there no longer exists association between gene expression levels and conditions. We use the same permutation to all the genes.</p>
-<div id="ash-on-differential-expression-with-original-shat" class="section level2">
-<h2>ash on differential expression with original shat</h2>
+library(ashr)
+library(mashr)</code></pre>
+<p>The data includes the gene expression data (table_s1) of 12,728 genes from 54 samples infected by 8 different types of bacteria and one non-infected control, measured at 18 hours post-infection.</p>
+<div id="same-permutation-for-all-gene" class="section level2">
+<h2>Same permutation for all gene</h2>
+<p>We randomly permute the samples with respect to the condition labels so that there no longer exists association between gene expression levels and conditions.</p>
 <pre class="r"><code>dat = readRDS(&#39;../output/Expression_data.rds&#39;)
 set.seed(123)
 
-dat_simu = list()
-fp = matrix(NA, nrow=10, ncol=8)
-for(i in 1:10){
-  perm = sample(1:54, 54)
+perm = sample(1:54, 54)
+d1 = dat$data[,perm]
+colnames(d1) = colnames(dat$data)
   
-  d1 = dat$data[,perm]
-  colnames(d1) = colnames(dat$data)
-  dat_simu[[i]] = d1
-  fit1=lmFit(object = d1, dat$design_diff)
-  fit1&lt;-eBayes(fit1)
-  
-  b1 = fit1$coefficients[,-1]
-  s1 &lt;- fit1$stdev.unscaled[,-1] * sqrt(fit1$s2.post)
-  t1 &lt;- fit1$t[,-1]
-  df1 &lt;- fit1$df.total
-  
-  for(j in 1:8){
-    m1 = ash(b1[,j], s1[,j],mixcompdist=&quot;normal&quot;, alpha=0, lik=lik_normal())
-    fp[i,j] = sum(m1$result$lfsr &lt; 0.05)
-  }
-}
-fp/nrow(dat$data)</code></pre>
-<pre><code>##              [,1]        [,2]         [,3]       [,4]         [,5]         [,6]
-##  [1,] 0.001414205 0.000000000 0.0000000000 0.00000000 0.0051068510 0.0001571339
-##  [2,] 0.000000000 0.000000000 0.0196417348 0.00000000 0.0000000000 0.0000000000
-##  [3,] 0.000000000 0.000000000 0.0014927718 0.00000000 0.0006285355 0.1074010057
-##  [4,] 0.000000000 0.002749843 0.0003928347 0.00000000 0.0000000000 0.0000000000
-##  [5,] 0.000000000 0.000000000 0.0000000000 0.00000000 0.0000000000 0.0000000000
-##  [6,] 0.000000000 0.000000000 0.0000000000 0.00000000 0.0000000000 0.0000000000
-##  [7,] 0.000000000 0.000000000 0.0000000000 0.00000000 0.0000000000 0.0000000000
-##  [8,] 0.000000000 0.000000000 0.0000000000 0.00000000 0.0000000000 0.0000000000
-##  [9,] 0.000000000 0.000000000 0.0000000000 0.00000000 0.0000000000 0.0000000000
-## [10,] 0.000000000 0.028755500 0.0059710874 0.01665619 0.0008642363 0.1391420490
-##               [,7]         [,8]
-##  [1,] 0.0006285355 0.0000000000
-##  [2,] 0.0000000000 0.0000000000
-##  [3,] 0.0005499686 0.0051068510
-##  [4,] 0.0000000000 0.0002357008
-##  [5,] 0.0000000000 0.0000000000
-##  [6,] 0.0000000000 0.0000000000
-##  [7,] 0.0000000000 0.0000000000
-##  [8,] 0.0000000000 0.0000000000
-##  [9,] 0.0058139535 0.0000000000
-## [10,] 0.0019641735 0.1298711502</code></pre>
+fit1=lmFit(object = d1, dat$design_diff)
+fit1&lt;-eBayes(fit1)
+b1 = fit1$coefficients[,-1]
+s1 &lt;- fit1$stdev.unscaled[,-1] * sqrt(fit1$s2.post)
+t1 &lt;- fit1$t[,-1]
+df1 &lt;- fit1$df.total
+
+fit2=lmFit(object = d1, dat$design_mean)
+fit2&lt;-eBayes(fit2)
+b2 = fit2$coefficients
+s2 &lt;- fit2$stdev.unscaled * sqrt(fit2$s2.post)
+t2 &lt;- fit2$t
+df2 &lt;- fit2$df.total</code></pre>
+<p>Fit ash for each condition:</p>
+<pre class="r"><code>m1.data = mash_set_data(b1, s1)
+m1.1by1 = mash_1by1(m1.data)
+fpash = colSums(m1.1by1$result$lfsr &lt; 0.05)</code></pre>
+<p>The false positive rates using ash:</p>
+<pre class="r"><code>fpash/nrow(d1)</code></pre>
+<pre><code>##           Rv       Rvplus           GC          BCG         Smeg         Yers 
+## 0.0014142049 0.0000000000 0.0000000000 0.0000000000 0.0051068510 0.0001571339 
+##         Salm        Staph 
+## 0.0006285355 0.0000000000</code></pre>
+<p>Fit mash on DE data:</p>
+<pre class="r"><code>strong1 = get_significant_results(m1.1by1, 0.05)
+U1.pca = cov_pca(m1.data, 5, subset=strong1)
+U1.ed = cov_ed(m1.data, U1.pca, subset=strong1)
+U1.c = cov_canonical(m1.data)
+m1.fit.diff = mash(m1.data, c(U1.c,U1.ed))</code></pre>
+<pre><code>##  - Computing 12728 x 419 likelihood matrix.
+##  - Likelihood calculations took 12.11 seconds.
+##  - Fitting model with 419 mixture components.
+##  - Model fitting took 39.76 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 8.76 seconds.</code></pre>
+<pre class="r"><code>fpmash.diff = length(get_significant_results(m1.fit.diff))</code></pre>
+<p>The FPR is 0.4259899. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m1.fit.diff), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-6-1.png" width="672" /> Add a small number on the diagonal of priors:</p>
+<pre class="r"><code>U1.ed.diag = lapply(U1.ed, function(U) U + 0.01 * diag(8))
+m1.fit.diff.diag = mash(m1.data, c(U1.c, U1.ed.diag))</code></pre>
+<pre><code>##  - Computing 12728 x 419 likelihood matrix.
+##  - Likelihood calculations took 8.40 seconds.
+##  - Fitting model with 419 mixture components.
+##  - Model fitting took 30.29 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 10.31 seconds.</code></pre>
+<pre class="r"><code>fpmash.diff.diag = length(get_significant_results(m1.fit.diff.diag))</code></pre>
+<p>The FPR is 0.35033. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m1.fit.diff.diag), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Fit mash common baseline:</p>
+<pre class="r"><code>m2.data = mash_set_data(b2, s2)
+m2.data.L = mash_update_data(m2.data, ref=&#39;none&#39;)
+m2.1by1 = mash_1by1(m2.data.L)
+strong2 = get_significant_results(m2.1by1, 0.05)
+U2.pca = cov_pca(m2.data.L, 5, subset=strong2)
+U2.ed = cov_ed(m2.data.L, U2.pca, subset=strong2)
+U2.c = cov_canonical(m2.data.L)
+
+m2.fit.mean = mash(m2.data.L, c(U2.c,U2.ed))</code></pre>
+<pre><code>##  - Computing 12728 x 419 likelihood matrix.
+##  - Likelihood calculations took 7.49 seconds.
+##  - Fitting model with 419 mixture components.
+##  - Model fitting took 33.54 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 9.88 seconds.</code></pre>
+<pre class="r"><code>fpmash.mean = length(get_significant_results(m2.fit.mean))</code></pre>
+<p>The FPR is 0.3360308. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m2.fit.mean), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-10-1.png" width="672" /> Add a small number on the diagonal of priors:</p>
+<pre class="r"><code>U2.ed.diag = lapply(U2.ed, function(U) U + 0.01 * diag(8))
+m2.fit.mean.diag = mash(m2.data.L, c(U2.c, U2.ed.diag))</code></pre>
+<pre><code>##  - Computing 12728 x 419 likelihood matrix.
+##  - Likelihood calculations took 7.81 seconds.
+##  - Fitting model with 419 mixture components.
+##  - Model fitting took 33.11 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 10.68 seconds.</code></pre>
+<pre class="r"><code>fpmash.mean.diag = length(get_significant_results(m2.fit.mean.diag))</code></pre>
+<p>The FPR is 0.2064739. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m2.fit.mean.diag), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
-<div id="ash-on-differential-expression-with-adjusted-shat" class="section level2">
-<h2>ash on differential expression with adjusted shat</h2>
-<pre class="r"><code>### take the function from mouthwash to calibrate shat
-adjust_by_t &lt;- function(betahat, sebetahat, df) {
-  
-  ## Convert t to z --------------------------------------
-  zstats &lt;- stats::qnorm(stats::pt(q = betahat / sebetahat, df = df))
-  snew &lt;- betahat / zstats
-  
-  return(snew)
-}</code></pre>
-<pre class="r"><code>fpa = matrix(NA, nrow=10, ncol=8)
-for(i in 1:10){
-  
-  d2 = dat_simu[[i]]
-  fit2=lmFit(object = d2, dat$design_diff)
-  fit2&lt;-eBayes(fit2)
-  
-  b2 = fit2$coefficients[,-1]
-  s2 &lt;- fit2$stdev.unscaled[,-1] * sqrt(fit2$s2.post)
-  t2 &lt;- fit2$t[,-1]
-  df2 &lt;- fit2$df.total
-  
-  s2.adj = adjust_by_t(b2, s2, df=df2)
-  
-  for(j in 1:8){
-    m2 = ash(b2[,j], s2.adj[,j],mixcompdist=&quot;normal&quot;, alpha=0, lik=lik_normal())
-    fpa[i,j] = sum(m2$result$lfsr &lt; 0.05)
-  }
+<div id="different-permutation-for-each-gene" class="section level2">
+<h2>Different permutation for each gene</h2>
+<p>We use independent and different permutation to each gene.</p>
+<pre class="r"><code>dat = readRDS(&#39;../output/Expression_data.rds&#39;)
+set.seed(123)
+d2 = dat$data
+for(i in 1:nrow(dat$data)){
+  perm = sample(1:54, 54)
+  d2[i,] = d2[i,perm]
 }
-fpa/nrow(dat$data)</code></pre>
-<pre><code>##               [,1]         [,2]         [,3]        [,4]         [,5]
-##  [1,] 0.0001571339 0.0000000000 0.000000e+00 0.000000000 1.728473e-03
-##  [2,] 0.0000000000 0.0000000000 1.147077e-02 0.000000000 0.000000e+00
-##  [3,] 0.0000000000 0.0000000000 3.928347e-04 0.000000000 7.856694e-05
-##  [4,] 0.0000000000 0.0006285355 7.856694e-05 0.000000000 0.000000e+00
-##  [5,] 0.0000000000 0.0000000000 0.000000e+00 0.000000000 0.000000e+00
-##  [6,] 0.0000000000 0.0000000000 0.000000e+00 0.000000000 0.000000e+00
-##  [7,] 0.0000000000 0.0000000000 0.000000e+00 0.000000000 0.000000e+00
-##  [8,] 0.0000000000 0.0000000000 0.000000e+00 0.000000000 0.000000e+00
-##  [9,] 0.0000000000 0.0000000000 0.000000e+00 0.000000000 0.000000e+00
-## [10,] 0.0000000000 0.0192489001 1.649906e-03 0.008170962 1.571339e-04
-##             [,6]         [,7]       [,8]
-##  [1,] 0.00000000 7.856694e-05 0.00000000
-##  [2,] 0.00000000 0.000000e+00 0.00000000
-##  [3,] 0.08335952 0.000000e+00 0.00204274
-##  [4,] 0.00000000 0.000000e+00 0.00000000
-##  [5,] 0.00000000 0.000000e+00 0.00000000
-##  [6,] 0.00000000 0.000000e+00 0.00000000
-##  [7,] 0.00000000 0.000000e+00 0.00000000
-##  [8,] 0.00000000 0.000000e+00 0.00000000
-##  [9,] 0.00000000 1.964173e-03 0.00000000
-## [10,] 0.12405720 3.928347e-04 0.11282212</code></pre>
+
+fit3=lmFit(object = d2, dat$design_diff)
+fit3&lt;-eBayes(fit3)
+b3 = fit3$coefficients[,-1]
+s3 &lt;- fit3$stdev.unscaled[,-1] * sqrt(fit3$s2.post)
+t3 &lt;- fit3$t[,-1]
+df3 &lt;- fit3$df.total
+
+fit4=lmFit(object = d2, dat$design_mean)
+fit4&lt;-eBayes(fit4)
+b4 = fit4$coefficients
+s4 &lt;- fit4$stdev.unscaled * sqrt(fit4$s2.post)
+t4 &lt;- fit4$t
+df4 &lt;- fit4$df.total</code></pre>
+<p>Fit ash for each condition:</p>
+<pre class="r"><code>m3.data = mash_set_data(b3, s3)
+m3.1by1 = mash_1by1(m3.data)
+fpash.g = colSums(m3.1by1$result$lfsr &lt; 0.05)</code></pre>
+<p>The false positive rates using ash:</p>
+<pre class="r"><code>fpash.g/nrow(d2)</code></pre>
+<pre><code>##           Rv       Rvplus           GC          BCG         Smeg         Yers 
+## 0.000000e+00 0.000000e+00 0.000000e+00 7.856694e-05 0.000000e+00 0.000000e+00 
+##         Salm        Staph 
+## 0.000000e+00 0.000000e+00</code></pre>
+<p>Fit mash on DE data:</p>
+<pre class="r"><code>U3.c = cov_canonical(m3.data)
+m3.fit.diff = mash(m3.data, U3.c)</code></pre>
+<pre><code>##  - Computing 12728 x 300 likelihood matrix.
+##  - Likelihood calculations took 5.05 seconds.
+##  - Fitting model with 300 mixture components.
+##  - Model fitting took 18.67 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 10.40 seconds.</code></pre>
+<pre class="r"><code>fpmash.diff.g = length(get_significant_results(m3.fit.diff))</code></pre>
+<p>The FPR is 0.2403363. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m3.fit.diff), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Fit mash common baseline:</p>
+<pre class="r"><code>m4.data = mash_set_data(b4, s4)
+m4.data.L = mash_update_data(m4.data, ref=&#39;none&#39;)
+m4.1by1 = mash_1by1(m4.data.L)
+U4.c = cov_canonical(m4.data.L)
+m4.fit.mean = mash(m4.data.L, U4.c)</code></pre>
+<pre><code>##  - Computing 12728 x 300 likelihood matrix.
+##  - Likelihood calculations took 5.52 seconds.
+##  - Fitting model with 300 mixture components.
+##  - Model fitting took 19.89 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 28.95 seconds.</code></pre>
+<pre class="r"><code>fpmash.mean.g = length(get_significant_results(m4.fit.mean))</code></pre>
+<p>The FPR is 7.856693910^{-4}. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m4.fit.mean), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
