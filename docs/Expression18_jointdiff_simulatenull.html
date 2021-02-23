@@ -456,23 +456,24 @@ U1.ed = cov_ed(m1.data, U1.pca, subset=strong1)
 U1.c = cov_canonical(m1.data)
 m1.fit.diff = mash(m1.data, c(U1.c,U1.ed))</code></pre>
 <pre><code>##  - Computing 12728 x 419 likelihood matrix.
-##  - Likelihood calculations took 12.11 seconds.
+##  - Likelihood calculations took 7.57 seconds.
 ##  - Fitting model with 419 mixture components.
-##  - Model fitting took 39.76 seconds.
+##  - Model fitting took 35.78 seconds.
 ##  - Computing posterior matrices.
 ##  - Computation allocated took 8.76 seconds.</code></pre>
 <pre class="r"><code>fpmash.diff = length(get_significant_results(m1.fit.diff))</code></pre>
 <p>The FPR is 0.4259899. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m1.fit.diff), las=2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-6-1.png" width="672" /> Add a small number on the diagonal of priors:</p>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Add a small number on the diagonal of priors:</p>
 <pre class="r"><code>U1.ed.diag = lapply(U1.ed, function(U) U + 0.01 * diag(8))
 m1.fit.diff.diag = mash(m1.data, c(U1.c, U1.ed.diag))</code></pre>
 <pre><code>##  - Computing 12728 x 419 likelihood matrix.
-##  - Likelihood calculations took 8.40 seconds.
+##  - Likelihood calculations took 7.31 seconds.
 ##  - Fitting model with 419 mixture components.
-##  - Model fitting took 30.29 seconds.
+##  - Model fitting took 32.08 seconds.
 ##  - Computing posterior matrices.
-##  - Computation allocated took 10.31 seconds.</code></pre>
+##  - Computation allocated took 9.88 seconds.</code></pre>
 <pre class="r"><code>fpmash.diff.diag = length(get_significant_results(m1.fit.diff.diag))</code></pre>
 <p>The FPR is 0.35033. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m1.fit.diff.diag), las=2, cex.names = 0.7)</code></pre>
@@ -488,27 +489,40 @@ U2.c = cov_canonical(m2.data.L)
 
 m2.fit.mean = mash(m2.data.L, c(U2.c,U2.ed))</code></pre>
 <pre><code>##  - Computing 12728 x 419 likelihood matrix.
-##  - Likelihood calculations took 7.49 seconds.
+##  - Likelihood calculations took 7.41 seconds.
 ##  - Fitting model with 419 mixture components.
-##  - Model fitting took 33.54 seconds.
+##  - Model fitting took 32.58 seconds.
 ##  - Computing posterior matrices.
 ##  - Computation allocated took 9.88 seconds.</code></pre>
 <pre class="r"><code>fpmash.mean = length(get_significant_results(m2.fit.mean))</code></pre>
 <p>The FPR is 0.3360308. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m2.fit.mean), las=2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-10-1.png" width="672" /> Add a small number on the diagonal of priors:</p>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Add a small number on the diagonal of priors:</p>
 <pre class="r"><code>U2.ed.diag = lapply(U2.ed, function(U) U + 0.01 * diag(8))
 m2.fit.mean.diag = mash(m2.data.L, c(U2.c, U2.ed.diag))</code></pre>
 <pre><code>##  - Computing 12728 x 419 likelihood matrix.
-##  - Likelihood calculations took 7.81 seconds.
+##  - Likelihood calculations took 7.53 seconds.
 ##  - Fitting model with 419 mixture components.
-##  - Model fitting took 33.11 seconds.
+##  - Model fitting took 42.47 seconds.
 ##  - Computing posterior matrices.
-##  - Computation allocated took 10.68 seconds.</code></pre>
+##  - Computation allocated took 17.00 seconds.</code></pre>
 <pre class="r"><code>fpmash.mean.diag = length(get_significant_results(m2.fit.mean.diag))</code></pre>
 <p>The FPR is 0.2064739. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m2.fit.mean.diag), las=2, cex.names = 0.7)</code></pre>
 <p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>If we exclude data-driven priors,</p>
+<pre class="r"><code>m2.fit.mean.c = mash(m2.data.L, U2.c)</code></pre>
+<pre><code>##  - Computing 12728 x 287 likelihood matrix.
+##  - Likelihood calculations took 13.29 seconds.
+##  - Fitting model with 287 mixture components.
+##  - Model fitting took 22.13 seconds.
+##  - Computing posterior matrices.
+##  - Computation allocated took 8.09 seconds.</code></pre>
+<pre class="r"><code>fpmash.mean.c = length(get_significant_results(m2.fit.mean.c))</code></pre>
+<p>The FPR is 0.1851037. We check estimated weights:</p>
+<pre class="r"><code>barplot(get_estimated_pi(m2.fit.mean.c), las=2, cex.names = 0.7)</code></pre>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 <div id="different-permutation-for-each-gene" class="section level2">
 <h2>Different permutation for each gene</h2>
@@ -548,15 +562,15 @@ fpash.g = colSums(m3.1by1$result$lfsr &lt; 0.05)</code></pre>
 <pre class="r"><code>U3.c = cov_canonical(m3.data)
 m3.fit.diff = mash(m3.data, U3.c)</code></pre>
 <pre><code>##  - Computing 12728 x 300 likelihood matrix.
-##  - Likelihood calculations took 5.05 seconds.
+##  - Likelihood calculations took 6.94 seconds.
 ##  - Fitting model with 300 mixture components.
-##  - Model fitting took 18.67 seconds.
+##  - Model fitting took 18.36 seconds.
 ##  - Computing posterior matrices.
-##  - Computation allocated took 10.40 seconds.</code></pre>
+##  - Computation allocated took 10.37 seconds.</code></pre>
 <pre class="r"><code>fpmash.diff.g = length(get_significant_results(m3.fit.diff))</code></pre>
 <p>The FPR is 0.2403363. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m3.fit.diff), las=2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 <p>Fit mash common baseline:</p>
 <pre class="r"><code>m4.data = mash_set_data(b4, s4)
 m4.data.L = mash_update_data(m4.data, ref=&#39;none&#39;)
@@ -564,15 +578,15 @@ m4.1by1 = mash_1by1(m4.data.L)
 U4.c = cov_canonical(m4.data.L)
 m4.fit.mean = mash(m4.data.L, U4.c)</code></pre>
 <pre><code>##  - Computing 12728 x 300 likelihood matrix.
-##  - Likelihood calculations took 5.52 seconds.
+##  - Likelihood calculations took 5.95 seconds.
 ##  - Fitting model with 300 mixture components.
-##  - Model fitting took 19.89 seconds.
+##  - Model fitting took 24.47 seconds.
 ##  - Computing posterior matrices.
-##  - Computation allocated took 28.95 seconds.</code></pre>
+##  - Computation allocated took 31.89 seconds.</code></pre>
 <pre class="r"><code>fpmash.mean.g = length(get_significant_results(m4.fit.mean))</code></pre>
 <p>The FPR is 7.856693910^{-4}. We check estimated weights:</p>
 <pre class="r"><code>barplot(get_estimated_pi(m4.fit.mean), las=2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><img src="Expression18_jointdiff_simulatenull_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
