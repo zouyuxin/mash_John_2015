@@ -23,6 +23,10 @@ Using John's data:
 
 * [Simulation under null](Expression18_jointdiff_simulatenull.html)
 
+* [Reprocess count data at time 18](Expression_reprocess18.html)
+
+* [EE on mean (joint) using reprocessed data](Expression18_EE_reprocess18_joint.html)
+
 <!--
 --------------------------------------------------------------
 
