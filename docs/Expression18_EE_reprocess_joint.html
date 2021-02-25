@@ -560,7 +560,7 @@ corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upp
 </div>
 <div id="genes" class="section level2">
 <h2>Genes</h2>
-<p>Yers-Salm cluster in Cormotif.</p>
+<p>Yers-Salm cluster in Cormotif, significant in mash.</p>
 <pre class="r"><code># before
 gene1177 = data.frame(mash.data.L$Bhat[1177,])
 colnames(gene1177) = &#39;Deviations&#39;
@@ -587,7 +587,7 @@ p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/YSgene1-1.png" width="960" /></p>
-<p>Yers-Salm cluster in Cormotif.</p>
+<p>Yers-Salm cluster in Cormotif, significant in mash.</p>
 <pre class="r"><code># before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
 colnames(gene7637) = &#39;Deviations&#39;
@@ -614,7 +614,7 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/YSgene2-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
+<p>All in Cormofit, non-significant in mash.</p>
 <pre class="r"><code># before
 gene4 = data.frame(mash.data.L$Bhat[4,])
 colnames(gene4) = &#39;Deviations&#39;
@@ -641,7 +641,7 @@ p.post = ggplot(gene4.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/allgene1-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
+<p>All in Cormofit, significant in mash.</p>
 <pre class="r"><code># before
 gene11445 = data.frame(mash.data.L$Bhat[11445,])
 colnames(gene11445) = &#39;Deviations&#39;
@@ -668,7 +668,7 @@ p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/allgene2-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
+<p>All in Cormofit, significant in mash.</p>
 <pre class="r"><code># before
 gene2481 = data.frame(mash.data.L$Bhat[2481,])
 colnames(gene2481) = &#39;Deviations&#39;
@@ -695,6 +695,33 @@ p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/allgene3-1.png" width="960" /></p>
+<p>Non-DE in Cormofit, significant in mash.</p>
+<pre class="r"><code># before
+gene19 = data.frame(mash.data.L$Bhat[19,])
+colnames(gene19) = &#39;Deviations&#39;
+gene19$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene19$se = mash.data.L$Shat[19,]
+gene19$Deviations[gene19$se == 0] = NA
+# after
+gene19.post = data.frame(mash.model$result$PosteriorMean[19,])
+colnames(gene19.post) = &#39;Deviations&#39;
+gene19.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene19.post$se = mash.model$result$PosteriorSD[19,]
+
+p.orig = ggplot(gene19, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000002549 original&#39; )
+
+p.post = ggplot(gene19.post, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000002549 mash&#39;)
+
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_reprocess_joint_files/figure-html/allgene4-1.png" width="960" /></p>
 </div>
 <div id="session-information" class="section level1">
 <h1>Session information</h1>
