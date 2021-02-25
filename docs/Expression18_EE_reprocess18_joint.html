@@ -423,7 +423,7 @@ div.section {
 ## 
 ##     mutate</code></pre>
 <p>Implement <code>mash</code> on John’s data at time point 18.</p>
-<pre class="r"><code>data = readRDS(&#39;../output/Expression_reprocess18_joint.rds&#39;)
+<pre class="r"><code>data = readRDS(&#39;../output/Expression_reprocesstime18_joint.rds&#39;)
 beta_class = data$beta
 sebeta_class = data$sebeta
 
@@ -436,7 +436,12 @@ strong = get_significant_results(m.1by1)
 
 data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
 data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
-<p>There are 2713 strong genes for at least one bacteria using <code>ash</code> condition-by-condition.</p>
+<p>There are 5 strong genes for at least one bacteria using <code>ash</code> condition-by-condition. We use DE genes identified in John’s paper as strong set:</p>
+<pre class="r"><code>john = readRDS(&#39;../data/JohnPaper18.rds&#39;)
+topgenes = names(john$motif)[john$motif!=&#39;non-DE&#39;]
+strong = which(rownames(beta_class) %in% topgenes)
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
+data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
 <div id="estimate-covariance-structures" class="section level2">
 <h2>Estimate covariance structures</h2>
 <p>Data Driven:</p>
@@ -450,9 +455,9 @@ pve.order = order(fmodel$pve, decreasing = TRUE)
 par(mfrow=c(2,3))
 for(i in pve.order){
   barplot(factors[,i], main=paste0(&#39;Factor &#39;,i, &#39; pve= &#39;, round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
-}
-par(mfrow=c(1,1))</code></pre>
+}</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/flash%20plot-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow=c(1,1))</code></pre>
 <pre class="r"><code>Factors = fmodel$ldf$f
 Flash_res = flash_get_fitted_values(fmodel)
 U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), &quot;Flash&quot;), 
@@ -465,50 +470,26 @@ U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), &quot;Flash&quot;),
 <pre class="r"><code>X.center = apply(data.strong.L$Bhat, 2, function(x) x - mean(x))
 U.dd = c(U.pca, U.Flash, list(&#39;XX&#39; = t(X.center) %*% X.center / nrow(X.center)))
 
-saveRDS(cov_ed(data.strong.L, U.dd), &#39;../output/Expression18_reprocess18_EE_jointmean_ED.rds&#39;)</code></pre>
+saveRDS(cov_ed(data.strong.L, U.dd), &#39;../output/Expression18_reprocesstime18_EE_jointmean_ED.rds&#39;)</code></pre>
 </div>
 <div id="mash-model" class="section level2">
 <h2>Mash model</h2>
-<pre class="r"><code>U.ed = readRDS(&#39;../output/Expression18_reprocess18_EE_jointmean_ED.rds&#39;)</code></pre>
-<pre class="r"><code>U.dd.diag = c(U.ed[c(&#39;ED_tPCA&#39;, &#39;ED_tFlash&#39;, &#39;ED_XX&#39;)], lapply(U.ed[c(&#39;ED_PCA_1&#39;,&#39;ED_PCA_2&#39;,&#39;ED_PCA_3&#39;, paste0(&#39;ED_Flash_&#39;,1:5))], function(U) U + 0.01*diag(8)))
+<pre class="r"><code>U.ed = readRDS(&#39;../output/Expression18_reprocesstime18_EE_jointmean_ED.rds&#39;)</code></pre>
+<pre class="r"><code>U.dd.diag = c(U.ed[c(&#39;ED_tPCA&#39;, &#39;ED_tFlash&#39;, &#39;ED_XX&#39;)], lapply(U.ed[c(&#39;ED_PCA_1&#39;,&#39;ED_PCA_2&#39;,&#39;ED_PCA_3&#39;, paste0(&#39;ED_Flash_&#39;,1:6))], function(U) U + 0.01*diag(8)))
 mash.model = mash(mash.data.L, c(U.c, U.dd.diag))
-saveRDS(mash.model, &#39;../output/Expression18_reprocess18_EE_jointmean_mash_model.rds&#39;) </code></pre>
+saveRDS(mash.model, &#39;../output/Expression18_reprocesstime18_EE_jointmean_mash_model.rds&#39;) </code></pre>
 </div>
 <div id="result" class="section level2">
 <h2>Result</h2>
-<pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_reprocess18_EE_jointmean_mash_model.rds&#39;)</code></pre>
+<pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_reprocesstime18_EE_jointmean_mash_model.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -49060.7</code></pre>
+<pre><code>## [1] -61169.84</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>There are 4129 differentially expressed genes.</p>
-<p>Check tFlash covariance matrix</p>
-<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]]
-colnames(x) &lt;- colnames(beta_class)[2:9]
-rownames(x) &lt;- colnames(x)
-corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45, tl.cex = 0.7)</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tFlash-1.png" width="672" /></p>
-<pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]])
-v = svd.out$v
-colnames(v) = colnames(beta_class)[-1]
-rownames(v) = colnames(v)
-options(repr.plot.width=10, repr.plot.height=5)
-for (j in 1:4)
-  barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for ED_tFlash&quot;))</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tFLASH%20pca-1.png" width="672" /></p>
-<pre class="r"><code>png(&#39;../output/Expression18_EE_mash_model_tFlash_v1.png&#39;)
-svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]])
-v = svd.out$v
-colnames(v) = colnames(beta_class)[-1]
-rownames(v) = colnames(v)
-barplot(v[,1]/v[,1][which.max(abs(v[,1]))], cex.names = 0.7, las = 2, 
-        main = paste0(&quot;EigenVector 1, pve=&quot;, round(svd.out$d[1]/sum(svd.out$d), 2)))
-dev.off()</code></pre>
+<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>There are 972 differentially expressed genes.</p>
 <p>Check tPCA covariance matrix</p>
 <pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tPCA&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
@@ -558,7 +539,7 @@ corrplot.mixed(x, tl.pos=&quot;d&quot;,upper=&#39;color&#39;, cl.lim=c(0,1), upp
 </div>
 <div id="genes" class="section level2">
 <h2>Genes</h2>
-<p>Yers-Salm cluster in Cormotif.</p>
+<p>Yers-Salm cluster in Cormotif, not significant in mash.</p>
 <pre class="r"><code># before
 gene1177 = data.frame(mash.data.L$Bhat[1177,])
 colnames(gene1177) = &#39;Deviations&#39;
@@ -572,20 +553,20 @@ gene1177.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#3
 gene1177.post$se = mash.model$result$PosteriorSD[1177,]
 
 p.orig = ggplot(gene1177, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-2,4) +
+  geom_point() + ylim(-3,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000079335 original&#39; )
 
 p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-2,4) +
+  geom_point() + ylim(-3,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000079335 mash&#39;)
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene1-1.png" width="960" /></p>
-<p>Yers-Salm cluster in Cormotif.</p>
+<p>Yers-Salm cluster in Cormotif, not significant in mash.</p>
 <pre class="r"><code># before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
 colnames(gene7637) = &#39;Deviations&#39;
@@ -612,7 +593,34 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene2-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
+<p>Yers-Salm cluster in Cormotif, not significant in mash.</p>
+<pre class="r"><code># before
+gene1631 = data.frame(mash.data.L$Bhat[1631,])
+colnames(gene1631) = &#39;Deviations&#39;
+gene1631$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene1631$se = mash.data.L$Shat[1631,]
+gene1631$Deviations[gene1631$se == 0] = NA
+# after
+gene1631.post = data.frame(mash.model$result$PosteriorMean[1631,])
+colnames(gene1631.post) = &#39;Deviations&#39;
+gene1631.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene1631.post$se = mash.model$result$PosteriorSD[1631,]
+
+p.orig = ggplot(gene1631, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-5,5) +
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000095380 original&#39; )
+
+p.post = ggplot(gene1631.post, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-5, 5) +
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000095380 mash&#39;)
+
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene3-1.png" width="960" /></p>
+<p>All in Cormofit, not significant in mash.</p>
 <pre class="r"><code># before
 gene93 = data.frame(mash.data.L$Bhat[93,])
 colnames(gene93) = &#39;Deviations&#39;
@@ -639,63 +647,9 @@ p.post = ggplot(gene93.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/allgene1-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
-<pre class="r"><code># before
-gene11445 = data.frame(mash.data.L$Bhat[11445,])
-colnames(gene11445) = &#39;Deviations&#39;
-gene11445$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
-gene11445$se = mash.data.L$Shat[11445,]
-gene11445$Deviations[gene11445$se == 0] = NA
-# after
-gene11445.post = data.frame(mash.model$result$PosteriorMean[11445,])
-colnames(gene11445.post) = &#39;Deviations&#39;
-gene11445.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
-gene11445.post$se = mash.model$result$PosteriorSD[11445,]
-
-p.orig = ggplot(gene11445, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1,4) +
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
-  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000196639 original&#39; )
-
-p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1, 4) +
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
-  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000196639 mash&#39;)
-
-ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/allgene2-1.png" width="960" /></p>
-<p>All in Cormofit.</p>
-<pre class="r"><code># before
-gene2481 = data.frame(mash.data.L$Bhat[2481,])
-colnames(gene2481) = &#39;Deviations&#39;
-gene2481$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
-gene2481$se = mash.data.L$Shat[2481,]
-gene2481$Deviations[gene2481$se == 0] = NA
-# after
-gene2481.post = data.frame(mash.model$result$PosteriorMean[2481,])
-colnames(gene2481.post) = &#39;Deviations&#39;
-gene2481.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
-gene2481.post$se = mash.model$result$PosteriorSD[2481,]
-
-p.orig = ggplot(gene2481, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + 
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
-  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000105497 original&#39; )
-
-p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + 
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
-  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000105497 mash&#39;)
-
-ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/allgene3-1.png" width="960" /></p>
 </div>
-<div id="session-information" class="section level1">
-<h1>Session information</h1>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
 <!-- Insert the session information into the document -->
 </div>
 
