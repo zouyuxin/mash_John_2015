@@ -23,9 +23,15 @@ Using John's data:
 
 * [Simulation under null](Expression18_jointdiff_simulatenull.html)
 
-* [Reprocess count data at time 18](Expression_reprocess18.html)
+------------------------------------------
 
-* [EE on mean (joint) using reprocessed data](Expression18_EE_reprocess18_joint.html)
+We reprocess the count data.
+
+* [Reprocess count data](Expression_reprocess18.html) We use voom+limma to fit model using data 
+    
+    1. at all time point. We extract time 18 summary statistics to fit mash. The result is [EE on mean (joint) using reprocessed data](Expression18_EE_reprocess_joint.Rmd)
+    
+    2. at time 18 only. The rersult is [EE on mean (joint) using reprocessed data](Expression18_EE_reprocess18_joint.html)
 
 <!--
 --------------------------------------------------------------
