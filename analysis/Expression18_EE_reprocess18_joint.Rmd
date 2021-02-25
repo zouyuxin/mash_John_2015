@@ -175,6 +175,7 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPa
                                "#E0F3F8","#91BFDB","#4575B4")))(40),
                tl.cex=1.2)
 ```
+
 Check pairwise sharing by magnitude:
 ```{r shareMag}
 x = get_pairwise_sharing(mash.model, FUN = abs)
@@ -216,13 +217,13 @@ gene1177.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Sal
 gene1177.post$se = mash.model$result$PosteriorSD[1177,]
 
 p.orig = ggplot(gene1177, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1,2.5) +
+  geom_point() + ylim(-2,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000079335 original' )
 
 p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1,2.5) +
+  geom_point() + ylim(-2,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000079335 mash')
@@ -245,13 +246,13 @@ gene7637.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Sal
 gene7637.post$se = mash.model$result$PosteriorSD[7637,]
 
 p.orig = ggplot(gene7637, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-8,3) +
+  geom_point() + ylim(-10,8) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000158488 original' )
 
 p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-8, 3) +
+  geom_point() + ylim(-10, 8) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000158488 mash')
@@ -303,13 +304,13 @@ gene11445.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Sa
 gene11445.post$se = mash.model$result$PosteriorSD[11445,]
 
 p.orig = ggplot(gene11445, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(0,4) +
+  geom_point() + ylim(-1,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000196639 original' )
 
 p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(0, 4) +
+  geom_point() + ylim(-1, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000196639 mash')
