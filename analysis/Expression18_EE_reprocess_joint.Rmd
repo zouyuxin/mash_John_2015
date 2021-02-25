@@ -377,7 +377,7 @@ p.post = ggplot(gene19.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-# Session information
+## Session information
 
 <!-- Insert the session information into the document -->
 ```{r session-info}
