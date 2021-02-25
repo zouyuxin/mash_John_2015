@@ -203,7 +203,7 @@ corrplot.mixed(x, tl.pos="d",upper='color', cl.lim=c(0,1), upper.col=colorRampPa
 
 ## Genes
 
-Yers-Salm cluster in Cormotif.
+Yers-Salm cluster in Cormotif, significant in mash.
 ```{r YSgene1, fig.height=5, fig.width=10}
 # before
 gene1177 = data.frame(mash.data.L$Bhat[1177,])
@@ -232,7 +232,7 @@ p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-Yers-Salm cluster in Cormotif.
+Yers-Salm cluster in Cormotif, significant in mash.
 ```{r YSgene2, fig.height=5, fig.width=10}
 # before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
@@ -261,7 +261,7 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-All in Cormofit.
+All in Cormofit, non-significant in mash.
 ```{r allgene1, fig.height=5, fig.width=10}
 # before
 gene4 = data.frame(mash.data.L$Bhat[4,])
@@ -290,7 +290,7 @@ p.post = ggplot(gene4.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-All in Cormofit.
+All in Cormofit, significant in mash.
 ```{r allgene2, fig.height=5, fig.width=10}
 # before
 gene11445 = data.frame(mash.data.L$Bhat[11445,])
@@ -319,7 +319,7 @@ p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-All in Cormofit.
+All in Cormofit, significant in mash.
 ```{r allgene3, fig.width=10, fig.height=5}
 # before
 gene2481 = data.frame(mash.data.L$Bhat[2481,])
@@ -344,6 +344,35 @@ p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000105497 mash')
+
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
+```
+
+Non-DE in Cormofit, significant in mash.
+```{r allgene4, fig.width=10, fig.height=5}
+# before
+gene19 = data.frame(mash.data.L$Bhat[19,])
+colnames(gene19) = 'Deviations'
+gene19$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
+gene19$se = mash.data.L$Shat[19,]
+gene19$Deviations[gene19$se == 0] = NA
+# after
+gene19.post = data.frame(mash.model$result$PosteriorMean[19,])
+colnames(gene19.post) = 'Deviations'
+gene19.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
+gene19.post$se = mash.model$result$PosteriorSD[19,]
+
+p.orig = ggplot(gene19, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
+  geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000002549 original' )
+
+p.post = ggplot(gene19.post, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000002549 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
