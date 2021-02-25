@@ -469,7 +469,7 @@ head(groups)</code></pre>
 5.M375.none.4  M375 none    4    1 8.8
 6.M372.Smeg.48 M372 Smeg   48    1 9.5</code></pre>
 <ul>
-<li>Normalize with TMM (<code>calcNormFactors</code>) and transfer to cpm.</li>
+<li>Normalize with TMM (<code>calcNormFactors</code>).</li>
 </ul>
 <pre class="r"><code># time 18
 idx = which(groups$time == 18)
@@ -480,20 +480,19 @@ y &lt;- calcNormFactors(y)</code></pre>
 <ul>
 <li>Create the model using a group means parametrization</li>
 </ul>
-<pre class="r"><code>contrasts(groups$extr) = contr.Sum(levels(groups$extr))
-design &lt;- model.matrix(~ 0 + bact, data = groups)
-batch &lt;- model.matrix(~ extr + rin, data = groups)
-# Remove Staph 48 hr timepoint that does not exist
-# Clean up names of design matrix
-design &lt;- cbind(design, batch[,-1])
+<pre class="r"><code>contrasts(groups$extr) = contr.Sum(levels(factor(groups$extr)))
+contrasts(groups$ind) = contr.Sum(levels(groups$ind))
+design &lt;- model.matrix(~ 0 + bact + ind + extr + rin, data = groups)
 colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
 colnames(design) &lt;- gsub(&quot;:&quot;, &quot;.&quot;, colnames(design))
+colnames(design) &lt;- gsub(&quot;ind&quot;, &quot;&quot;, colnames(design))
 print(colnames(design))</code></pre>
 <pre><code> [1] &quot;none&quot;       &quot;Rv&quot;         &quot;Rvplus&quot;     &quot;GC&quot;         &quot;BCG&quot;       
- [6] &quot;Smeg&quot;       &quot;Yers&quot;       &quot;Salm&quot;       &quot;Staph&quot;      &quot;extr[S.1]&quot; 
-[11] &quot;extr[S.2]&quot;  &quot;extr[S.3]&quot;  &quot;extr[S.4]&quot;  &quot;extr[S.5]&quot;  &quot;extr[S.6]&quot; 
-[16] &quot;extr[S.7]&quot;  &quot;extr[S.8]&quot;  &quot;extr[S.9]&quot;  &quot;extr[S.10]&quot; &quot;extr[S.11]&quot;
-[21] &quot;extr[S.12]&quot; &quot;rin&quot;       </code></pre>
+ [6] &quot;Smeg&quot;       &quot;Yers&quot;       &quot;Salm&quot;       &quot;Staph&quot;      &quot;[S.M372]&quot;  
+[11] &quot;[S.M373]&quot;   &quot;[S.M374]&quot;   &quot;[S.M375]&quot;   &quot;[S.M376]&quot;   &quot;extr[S.1]&quot; 
+[16] &quot;extr[S.2]&quot;  &quot;extr[S.3]&quot;  &quot;extr[S.4]&quot;  &quot;extr[S.5]&quot;  &quot;extr[S.6]&quot; 
+[21] &quot;extr[S.7]&quot;  &quot;extr[S.8]&quot;  &quot;extr[S.9]&quot;  &quot;extr[S.10]&quot; &quot;extr[S.11]&quot;
+[26] &quot;extr[S.12]&quot; &quot;rin&quot;       </code></pre>
 <ul>
 <li>Transfer with <code>voom</code></li>
 </ul>
