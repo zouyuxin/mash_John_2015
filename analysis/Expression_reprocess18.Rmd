@@ -70,25 +70,28 @@ groups$extr <- factor(groups$extr)
 head(groups)
 ```
 
+## All time points
+
 * Normalize with TMM (`calcNormFactors`).
 
 ```{r TMM}
-# time 18
-idx = which(groups$time == 18)
-groups = groups[idx,]
-counts = counts[, idx]
 y <- DGEList(counts)
 y <- calcNormFactors(y)
 ```
 
 * Create the model using a group means parametrization
+
 ```{r model}
 contrasts(groups$extr) = contr.Sum(levels(factor(groups$extr)))
 contrasts(groups$ind) = contr.Sum(levels(groups$ind))
-design <- model.matrix(~ 0 + bact + ind + extr + rin, data = groups)
+design <- model.matrix(~ 0 + bact:time, data = groups)
+batch <- model.matrix(~ ind + extr + rin, data = groups)
+design <- cbind(design, batch[,-1])
 colnames(design) <- gsub("bact", "", colnames(design))
 colnames(design) <- gsub(":", ".", colnames(design))
 colnames(design) <- gsub("ind", "", colnames(design))
+colnames(design) <- gsub("time", "t", colnames(design))
+design <- design[, -which(colnames(design) == "Staph.t48")]
 print(colnames(design))
 ```
 
@@ -104,16 +107,61 @@ fitB = eBayes(fit)
 ```
 
 ```{r assign}
-beta_class = fitB$coefficients[,1:9]
-sebeta_class = fitB$stdev.unscaled[, 1:9] * sqrt(fitB$s2.post)
-t_class = fitB$t[, 1:9]
+beta_class = fitB$coefficients[,10:18]
+sebeta_class = fitB$stdev.unscaled[, 10:18] * sqrt(fitB$s2.post)
+t_class = fitB$t[, 10:18]
 df_class = fitB$df.total
-saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups),
-        '../output/Expression_reprocess18_joint.rds')
+d1 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+saveRDS(d1, '../output/Expression_reprocessalltime18_joint.rds')
 ```
 
+## Time 18 only
 
-# Session information
+* Extract time 18 and Normalize with TMM (`calcNormFactors`).
+
+```{r TMM}
+idx = which(groups$time == 18)
+groups18 = groups[idx,]
+counts18 = counts[,idx]
+y18 <- DGEList(counts18)
+y18 <- calcNormFactors(y18)
+```
+
+* Create the model using a group means parametrization
+
+```{r model}
+contrasts(groups18$extr) = contr.Sum(levels(factor(groups18$extr)))
+contrasts(groups18$ind) = contr.Sum(levels(groups18$ind))
+design <- model.matrix(~ 0 + bact, data = groups18)
+batch <- model.matrix(~ ind + extr + rin, data = groups18)
+design <- cbind(design, batch[,-1])
+colnames(design) <- gsub("bact", "", colnames(design))
+colnames(design) <- gsub(":", ".", colnames(design))
+colnames(design) <- gsub("ind", "", colnames(design))
+print(colnames(design))
+```
+
+* Transfer with `voom`
+```{r voom}
+v18 = voom(y18, design)
+```
+
+* limma
+```{r limma}
+fit18 = lmFit(v18, design)
+fit18B = eBayes(fit18)
+```
+
+```{r assign}
+beta_class = fit18B$coefficients[,1:9]
+sebeta_class = fit18B$stdev.unscaled[, 1:9] * sqrt(fit18B$s2.post)
+t_class = fit18B$t[, 1:9]
+df_class = fit18B$df.total
+d2 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+saveRDS(d2, '../output/Expression_reprocesstime18_joint.rds')
+```
+
+## Session information
 
 <!-- Insert the session information into the document -->
 ```{r session-info}
