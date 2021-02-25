@@ -70,7 +70,7 @@ groups$extr <- factor(groups$extr)
 head(groups)
 ```
 
-* Normalize with TMM (`calcNormFactors`) and transfer to cpm.
+* Normalize with TMM (`calcNormFactors`).
 
 ```{r TMM}
 # time 18
@@ -83,14 +83,12 @@ y <- calcNormFactors(y)
 
 * Create the model using a group means parametrization
 ```{r model}
-contrasts(groups$extr) = contr.Sum(levels(groups$extr))
-design <- model.matrix(~ 0 + bact, data = groups)
-batch <- model.matrix(~ extr + rin, data = groups)
-# Remove Staph 48 hr timepoint that does not exist
-# Clean up names of design matrix
-design <- cbind(design, batch[,-1])
+contrasts(groups$extr) = contr.Sum(levels(factor(groups$extr)))
+contrasts(groups$ind) = contr.Sum(levels(groups$ind))
+design <- model.matrix(~ 0 + bact + ind + extr + rin, data = groups)
 colnames(design) <- gsub("bact", "", colnames(design))
 colnames(design) <- gsub(":", ".", colnames(design))
+colnames(design) <- gsub("ind", "", colnames(design))
 print(colnames(design))
 ```
 
