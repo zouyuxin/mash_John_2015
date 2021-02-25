@@ -119,7 +119,7 @@ saveRDS(d1, '../output/Expression_reprocessalltime18_joint.rds')
 
 * Extract time 18 and Normalize with TMM (`calcNormFactors`).
 
-```{r TMM}
+```{r TMM18}
 idx = which(groups$time == 18)
 groups18 = groups[idx,]
 counts18 = counts[,idx]
@@ -129,7 +129,7 @@ y18 <- calcNormFactors(y18)
 
 * Create the model using a group means parametrization
 
-```{r model}
+```{r model18}
 contrasts(groups18$extr) = contr.Sum(levels(factor(groups18$extr)))
 contrasts(groups18$ind) = contr.Sum(levels(groups18$ind))
 design <- model.matrix(~ 0 + bact, data = groups18)
@@ -142,17 +142,17 @@ print(colnames(design))
 ```
 
 * Transfer with `voom`
-```{r voom}
+```{r voom18}
 v18 = voom(y18, design)
 ```
 
 * limma
-```{r limma}
+```{r limma18}
 fit18 = lmFit(v18, design)
 fit18B = eBayes(fit18)
 ```
 
-```{r assign}
+```{r assign18}
 beta_class = fit18B$coefficients[,1:9]
 sebeta_class = fit18B$stdev.unscaled[, 1:9] * sqrt(fit18B$s2.post)
 t_class = fit18B$t[, 1:9]
