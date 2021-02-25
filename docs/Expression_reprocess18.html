@@ -468,21 +468,70 @@ head(groups)</code></pre>
 4.M374.BCG.48  M374  BCG   48    1 8.8
 5.M375.none.4  M375 none    4    1 8.8
 6.M372.Smeg.48 M372 Smeg   48    1 9.5</code></pre>
+<div id="all-time-points" class="section level2">
+<h2>All time points</h2>
 <ul>
 <li>Normalize with TMM (<code>calcNormFactors</code>).</li>
 </ul>
-<pre class="r"><code># time 18
-idx = which(groups$time == 18)
-groups = groups[idx,]
-counts = counts[, idx]
-y &lt;- DGEList(counts)
+<pre class="r"><code>y &lt;- DGEList(counts)
 y &lt;- calcNormFactors(y)</code></pre>
 <ul>
 <li>Create the model using a group means parametrization</li>
 </ul>
 <pre class="r"><code>contrasts(groups$extr) = contr.Sum(levels(factor(groups$extr)))
 contrasts(groups$ind) = contr.Sum(levels(groups$ind))
-design &lt;- model.matrix(~ 0 + bact + ind + extr + rin, data = groups)
+design &lt;- model.matrix(~ 0 + bact:time, data = groups)
+batch &lt;- model.matrix(~ ind + extr + rin, data = groups)
+design &lt;- cbind(design, batch[,-1])
+colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
+colnames(design) &lt;- gsub(&quot;:&quot;, &quot;.&quot;, colnames(design))
+colnames(design) &lt;- gsub(&quot;ind&quot;, &quot;&quot;, colnames(design))
+colnames(design) &lt;- gsub(&quot;time&quot;, &quot;t&quot;, colnames(design))
+design &lt;- design[, -which(colnames(design) == &quot;Staph.t48&quot;)]
+print(colnames(design))</code></pre>
+<pre><code> [1] &quot;none.t4&quot;    &quot;Rv.t4&quot;      &quot;Rvplus.t4&quot;  &quot;GC.t4&quot;      &quot;BCG.t4&quot;    
+ [6] &quot;Smeg.t4&quot;    &quot;Yers.t4&quot;    &quot;Salm.t4&quot;    &quot;Staph.t4&quot;   &quot;none.t18&quot;  
+[11] &quot;Rv.t18&quot;     &quot;Rvplus.t18&quot; &quot;GC.t18&quot;     &quot;BCG.t18&quot;    &quot;Smeg.t18&quot;  
+[16] &quot;Yers.t18&quot;   &quot;Salm.t18&quot;   &quot;Staph.t18&quot;  &quot;none.t48&quot;   &quot;Rv.t48&quot;    
+[21] &quot;Rvplus.t48&quot; &quot;GC.t48&quot;     &quot;BCG.t48&quot;    &quot;Smeg.t48&quot;   &quot;Yers.t48&quot;  
+[26] &quot;Salm.t48&quot;   &quot;[S.M372]&quot;   &quot;[S.M373]&quot;   &quot;[S.M374]&quot;   &quot;[S.M375]&quot;  
+[31] &quot;[S.M376]&quot;   &quot;extr[S.1]&quot;  &quot;extr[S.2]&quot;  &quot;extr[S.3]&quot;  &quot;extr[S.4]&quot; 
+[36] &quot;extr[S.5]&quot;  &quot;extr[S.6]&quot;  &quot;extr[S.7]&quot;  &quot;extr[S.8]&quot;  &quot;extr[S.9]&quot; 
+[41] &quot;extr[S.10]&quot; &quot;extr[S.11]&quot; &quot;extr[S.12]&quot; &quot;rin&quot;       </code></pre>
+<ul>
+<li>Transfer with <code>voom</code></li>
+</ul>
+<pre class="r"><code>v = voom(y, design)</code></pre>
+<ul>
+<li>limma</li>
+</ul>
+<pre class="r"><code>fit = lmFit(v, design)
+fitB = eBayes(fit)</code></pre>
+<pre class="r"><code>beta_class = fitB$coefficients[,10:18]
+sebeta_class = fitB$stdev.unscaled[, 10:18] * sqrt(fitB$s2.post)
+t_class = fitB$t[, 10:18]
+df_class = fitB$df.total
+d1 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+saveRDS(d1, &#39;../output/Expression_reprocessalltime18_joint.rds&#39;)</code></pre>
+</div>
+<div id="time-18-only" class="section level2">
+<h2>Time 18 only</h2>
+<ul>
+<li>Extract time 18 and Normalize with TMM (<code>calcNormFactors</code>).</li>
+</ul>
+<pre class="r"><code>idx = which(groups$time == 18)
+groups18 = groups[idx,]
+counts18 = counts[,idx]
+y18 &lt;- DGEList(counts18)
+y18 &lt;- calcNormFactors(y18)</code></pre>
+<ul>
+<li>Create the model using a group means parametrization</li>
+</ul>
+<pre class="r"><code>contrasts(groups18$extr) = contr.Sum(levels(factor(groups18$extr)))
+contrasts(groups18$ind) = contr.Sum(levels(groups18$ind))
+design &lt;- model.matrix(~ 0 + bact, data = groups18)
+batch &lt;- model.matrix(~ ind + extr + rin, data = groups18)
+design &lt;- cbind(design, batch[,-1])
 colnames(design) &lt;- gsub(&quot;bact&quot;, &quot;&quot;, colnames(design))
 colnames(design) &lt;- gsub(&quot;:&quot;, &quot;.&quot;, colnames(design))
 colnames(design) &lt;- gsub(&quot;ind&quot;, &quot;&quot;, colnames(design))
@@ -496,20 +545,21 @@ print(colnames(design))</code></pre>
 <ul>
 <li>Transfer with <code>voom</code></li>
 </ul>
-<pre class="r"><code>v = voom(y, design)</code></pre>
+<pre class="r"><code>v18 = voom(y18, design)</code></pre>
 <ul>
 <li>limma</li>
 </ul>
-<pre class="r"><code>fit = lmFit(v, design)
-fitB = eBayes(fit)</code></pre>
-<pre class="r"><code>beta_class = fitB$coefficients[,1:9]
-sebeta_class = fitB$stdev.unscaled[, 1:9] * sqrt(fitB$s2.post)
-t_class = fitB$t[, 1:9]
-df_class = fitB$df.total
-saveRDS(list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups),
-        &#39;../output/Expression_reprocess18_joint.rds&#39;)</code></pre>
-<div id="session-information" class="section level1">
-<h1>Session information</h1>
+<pre class="r"><code>fit18 = lmFit(v18, design)
+fit18B = eBayes(fit18)</code></pre>
+<pre class="r"><code>beta_class = fit18B$coefficients[,1:9]
+sebeta_class = fit18B$stdev.unscaled[, 1:9] * sqrt(fit18B$s2.post)
+t_class = fit18B$t[, 1:9]
+df_class = fit18B$df.total
+d2 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+saveRDS(d2, &#39;../output/Expression_reprocesstime18_joint.rds&#39;)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
 <!-- Insert the session information into the document -->
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.0.3 (2020-10-10)
