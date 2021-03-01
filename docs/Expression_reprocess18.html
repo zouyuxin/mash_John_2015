@@ -414,7 +414,7 @@ div.section {
 
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2021-02-25</p>
+<p><strong>Last updated:</strong> 2021-03-01</p>
 <p>The type of bacteria (bact), and the time post-infection (time) are treated as fixed effects. The individual (ind) is treated as fixed effect.</p>
 <p>The covariates RIN (rin) and extraction batch (extr) are included in the model to correct for these confounding effects.</p>
 <pre class="r"><code>library(&quot;limma&quot;)
@@ -511,7 +511,10 @@ fitB = eBayes(fit)</code></pre>
 sebeta_class = fitB$stdev.unscaled[, 10:18] * sqrt(fitB$s2.post)
 t_class = fitB$t[, 10:18]
 df_class = fitB$df.total
-d1 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+V = solve(t(design) %*% design)
+V = V[10:18, 10:18]
+V = cov2cor(V)
+d1 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups, V=V)
 saveRDS(d1, &#39;../output/Expression_reprocessalltime18_joint.rds&#39;)</code></pre>
 </div>
 <div id="time-18-only" class="section level2">
@@ -555,7 +558,10 @@ fit18B = eBayes(fit18)</code></pre>
 sebeta_class = fit18B$stdev.unscaled[, 1:9] * sqrt(fit18B$s2.post)
 t_class = fit18B$t[, 1:9]
 df_class = fit18B$df.total
-d2 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups)
+V = solve(t(design) %*% design)
+V = V[1:9, 1:9]
+V = cov2cor(V)
+d2 = list(beta = beta_class, sebeta = sebeta_class, t = t_class, df = df_class, groups = groups, V=V)
 saveRDS(d2, &#39;../output/Expression_reprocesstime18_joint.rds&#39;)</code></pre>
 </div>
 <div id="session-information" class="section level2">
