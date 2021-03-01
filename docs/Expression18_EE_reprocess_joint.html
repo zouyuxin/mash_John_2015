@@ -428,16 +428,16 @@ beta_class = data$beta
 sebeta_class = data$sebeta
 colnames(beta_class) = colnames(sebeta_class) = c(&#39;none&#39;, &#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;)
 
-mash.data = mash_set_data(beta_class, sebeta_class)
+mash.data = mash_set_data(beta_class, sebeta_class, V = data$V)
 mash.data.L = mash_update_data(mash.data, ref=&#39;none&#39;)</code></pre>
 <p>Top genes:</p>
 <pre class="r"><code># find strong genes
 m.1by1 = mash_1by1(mash.data.L, alpha=0)
 strong = get_significant_results(m.1by1)
 
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], V = data$V)
 data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
-<p>There are 5570 strong genes for at least one bacteria using <code>ash</code> condition-by-condition.</p>
+<p>There are 9649 strong genes for at least one bacteria using <code>ash</code> condition-by-condition.</p>
 <div id="estimate-covariance-structures" class="section level2">
 <h2>Estimate covariance structures</h2>
 <p>Data Driven:</p>
@@ -472,7 +472,7 @@ saveRDS(cov_ed(data.strong.L, U.dd), &#39;../output/Expression18_reprocessalltim
 <div id="mash-model" class="section level2">
 <h2>Mash model</h2>
 <pre class="r"><code>U.ed = readRDS(&#39;../output/Expression18_reprocessalltime_EE_jointmean_ED.rds&#39;)</code></pre>
-<pre class="r"><code>U.dd.diag = c(U.ed[c(&#39;ED_tPCA&#39;, &#39;ED_tFlash&#39;, &#39;ED_XX&#39;)], lapply(U.ed[c(&#39;ED_PCA_1&#39;,&#39;ED_PCA_2&#39;,&#39;ED_PCA_3&#39;, paste0(&#39;ED_Flash_&#39;,1:7))], function(U) U + 0.01*diag(8)))
+<pre class="r"><code>U.dd.diag = c(U.ed[c(&#39;ED_tPCA&#39;, &#39;ED_tFlash&#39;, &#39;ED_XX&#39;)], lapply(U.ed[c(&#39;ED_PCA_1&#39;,&#39;ED_PCA_2&#39;,&#39;ED_PCA_3&#39;, paste0(&#39;ED_Flash_&#39;,1:8))], function(U) U + 0.01*diag(8)))
 mash.model = mash(mash.data.L, c(U.c, U.dd.diag))
 saveRDS(mash.model, &#39;../output/Expression18_reprocessalltime_EE_jointmean_mash_model.rds&#39;) </code></pre>
 </div>
@@ -481,12 +481,12 @@ saveRDS(mash.model, &#39;../output/Expression18_reprocessalltime_EE_jointmean_ma
 <pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_reprocessalltime_EE_jointmean_mash_model.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -28785.29</code></pre>
+<pre><code>## [1] -11456.03</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>There are 6377 differentially expressed genes.</p>
+<p>There are 9814 differentially expressed genes.</p>
 <p>Check tFlash covariance matrix</p>
 <pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
@@ -614,7 +614,7 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess_joint_files/figure-html/YSgene2-1.png" width="960" /></p>
-<p>All in Cormofit, non-significant in mash.</p>
+<p>All in Cormofit, significant in mash.</p>
 <pre class="r"><code># before
 gene4 = data.frame(mash.data.L$Bhat[4,])
 colnames(gene4) = &#39;Deviations&#39;
