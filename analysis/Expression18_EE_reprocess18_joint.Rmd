@@ -20,7 +20,7 @@ data = readRDS('../output/Expression_reprocesstime18_joint.rds')
 beta_class = data$beta
 sebeta_class = data$sebeta
 
-mash.data = mash_set_data(beta_class, sebeta_class)
+mash.data = mash_set_data(beta_class, sebeta_class, V=data$V)
 mash.data.L = mash_update_data(mash.data, ref='none')
 ```
 
@@ -30,17 +30,10 @@ Top genes:
 m.1by1 = mash_1by1(mash.data.L, alpha=0)
 strong = get_significant_results(m.1by1)
 
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], V = data$V)
 data.strong.L = mash_update_data(data.strong, ref = 'none')
 ```
-There are `r length(strong)` strong genes for at least one bacteria using `ash` condition-by-condition. We use DE genes identified in John's paper as strong set:
-```{r}
-john = readRDS('../data/JohnPaper18.rds')
-topgenes = names(john$motif)[john$motif!='non-DE']
-strong = which(rownames(beta_class) %in% topgenes)
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
-data.strong.L = mash_update_data(data.strong, ref = 'none')
-```
+There are `r length(strong)` strong genes for at least one bacteria using `ash` condition-by-condition.
 
 ## Estimate covariance structures
 
@@ -119,25 +112,25 @@ barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)
 
 There are `r length(get_significant_results(mash.model))` differentially expressed genes.
 
-Check tPCA covariance matrix
+Check tFlash covariance matrix
 
-```{r tPCA}
-x           <- mash.model$fitted_g$Ulist[["ED_tPCA"]]
+```{r tFlash}
+x           <- mash.model$fitted_g$Ulist[["ED_tFlash"]]
 colnames(x) <- colnames(beta_class)[2:9]
 rownames(x) <- colnames(x)
 corrplot(x, method='color', cl.lim=c(0,1), type='upper', addCoef.col = "black", tl.col="black", tl.srt=45, tl.cex = 0.7)
 ```
 
-```{r tPCA pca}
+```{r tFlash pca}
 layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[["ED_tPCA"]])
+svd.out = svd(mash.model$fitted_g$Ulist[["ED_tFlash"]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0("EigenVector ", j, " for ED_tPCA"))
+          las = 2, main = paste0("EigenVector ", j, " for ED_tFlash"))
 ```
 
 Check pairwise sharing by magnitude and sign:
@@ -207,7 +200,7 @@ p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-Yers-Salm cluster in Cormotif, not significant in mash.
+Yers-Salm cluster in Cormotif, significant in mash.
 ```{r YSgene2, fig.height=5, fig.width=10}
 # before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
@@ -236,7 +229,7 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-Yers-Salm cluster in Cormotif, not significant in mash.
+Yers-Salm cluster in Cormotif, significant in mash.
 ```{r YSgene3, fig.height=5, fig.width=10}
 # before
 gene1631 = data.frame(mash.data.L$Bhat[1631,])
@@ -265,7 +258,7 @@ p.post = ggplot(gene1631.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-All in Cormofit, not significant in mash.
+All in Cormofit, significant in mash.
 ```{r allgene1, fig.height=5, fig.width=10}
 # before
 gene93 = data.frame(mash.data.L$Bhat[93,])
