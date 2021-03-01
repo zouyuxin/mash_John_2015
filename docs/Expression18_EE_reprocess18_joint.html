@@ -427,21 +427,16 @@ div.section {
 beta_class = data$beta
 sebeta_class = data$sebeta
 
-mash.data = mash_set_data(beta_class, sebeta_class)
+mash.data = mash_set_data(beta_class, sebeta_class, V=data$V)
 mash.data.L = mash_update_data(mash.data, ref=&#39;none&#39;)</code></pre>
 <p>Top genes:</p>
 <pre class="r"><code># find strong genes
 m.1by1 = mash_1by1(mash.data.L, alpha=0)
 strong = get_significant_results(m.1by1)
 
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,], V = data$V)
 data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
-<p>There are 5 strong genes for at least one bacteria using <code>ash</code> condition-by-condition. We use DE genes identified in John’s paper as strong set:</p>
-<pre class="r"><code>john = readRDS(&#39;../data/JohnPaper18.rds&#39;)
-topgenes = names(john$motif)[john$motif!=&#39;non-DE&#39;]
-strong = which(rownames(beta_class) %in% topgenes)
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
-data.strong.L = mash_update_data(data.strong, ref = &#39;none&#39;)</code></pre>
+<p>There are 9461 strong genes for at least one bacteria using <code>ash</code> condition-by-condition.</p>
 <div id="estimate-covariance-structures" class="section level2">
 <h2>Estimate covariance structures</h2>
 <p>Data Driven:</p>
@@ -484,28 +479,28 @@ saveRDS(mash.model, &#39;../output/Expression18_reprocesstime18_EE_jointmean_mas
 <pre class="r"><code>mash.model = readRDS(&#39;../output/Expression18_reprocesstime18_EE_jointmean_mash_model.rds&#39;)</code></pre>
 <p>The log-likelihood of fit is</p>
 <pre class="r"><code>get_loglik(mash.model)</code></pre>
-<pre><code>## [1] -61169.84</code></pre>
+<pre><code>## [1] -23639.44</code></pre>
 <p>Here is a plot of weights learned:</p>
 <pre class="r"><code>options(repr.plot.width=12, repr.plot.height=4)
 barplot(get_estimated_pi(mash.model), las = 2, cex.names = 0.7)</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>There are 972 differentially expressed genes.</p>
-<p>Check tPCA covariance matrix</p>
-<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tPCA&quot;]]
+<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>There are 10349 differentially expressed genes.</p>
+<p>Check tFlash covariance matrix</p>
+<pre class="r"><code>x           &lt;- mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]]
 colnames(x) &lt;- colnames(beta_class)[2:9]
 rownames(x) &lt;- colnames(x)
 corrplot(x, method=&#39;color&#39;, cl.lim=c(0,1), type=&#39;upper&#39;, addCoef.col = &quot;black&quot;, tl.col=&quot;black&quot;, tl.srt=45, tl.cex = 0.7)</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tPCA-1.png" width="672" /></p>
+<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tFlash-1.png" width="672" /></p>
 <pre class="r"><code>layout(matrix(c(1,2,3,4), 2, 2, byrow=TRUE))
-svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tPCA&quot;]])
+svd.out = svd(mash.model$fitted_g$Ulist[[&quot;ED_tFlash&quot;]])
 v = svd.out$v
 colnames(v) = colnames(beta_class)[-1]
 rownames(v) = colnames(v)
 options(repr.plot.width=10, repr.plot.height=5)
 for (j in 1:4)
   barplot(v[,j]/v[,j][which.max(abs(v[,j]))], cex.names = 0.7,
-          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for ED_tPCA&quot;))</code></pre>
-<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tPCA%20pca-1.png" width="672" /></p>
+          las = 2, main = paste0(&quot;EigenVector &quot;, j, &quot; for ED_tFlash&quot;))</code></pre>
+<p><img src="Expression18_EE_reprocess18_joint_files/figure-html/tFlash%20pca-1.png" width="672" /></p>
 <p>Check pairwise sharing by magnitude and sign:</p>
 <pre class="r"><code>x = get_pairwise_sharing(mash.model)
 x[x &gt; 1]    &lt;- 1
@@ -566,7 +561,7 @@ p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene1-1.png" width="960" /></p>
-<p>Yers-Salm cluster in Cormotif, not significant in mash.</p>
+<p>Yers-Salm cluster in Cormotif, significant in mash.</p>
 <pre class="r"><code># before
 gene7637 = data.frame(mash.data.L$Bhat[7637,])
 colnames(gene7637) = &#39;Deviations&#39;
@@ -593,7 +588,7 @@ p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene2-1.png" width="960" /></p>
-<p>Yers-Salm cluster in Cormotif, not significant in mash.</p>
+<p>Yers-Salm cluster in Cormotif, significant in mash.</p>
 <pre class="r"><code># before
 gene1631 = data.frame(mash.data.L$Bhat[1631,])
 colnames(gene1631) = &#39;Deviations&#39;
@@ -620,7 +615,7 @@ p.post = ggplot(gene1631.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_reprocess18_joint_files/figure-html/YSgene3-1.png" width="960" /></p>
-<p>All in Cormofit, not significant in mash.</p>
+<p>All in Cormofit, significant in mash.</p>
 <pre class="r"><code># before
 gene93 = data.frame(mash.data.L$Bhat[93,])
 colnames(gene93) = &#39;Deviations&#39;
