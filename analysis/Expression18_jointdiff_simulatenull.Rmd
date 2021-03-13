@@ -69,10 +69,10 @@ The FPR is `r fpmash.diff/nrow(b1)`. We check estimated weights:
 barplot(get_estimated_pi(m1.fit.diff), las=2, cex.names = 0.7)
 ```
 
-Add a small number on the diagonal of priors:
+The ED priors already adjusted with a small diagonal elements. We add a small number on the diagonal of cannonical priors:
 ```{r}
-U1.ed.diag = lapply(U1.ed, function(U) U + 0.01 * diag(8))
-m1.fit.diff.diag = mash(m1.data, c(U1.c, U1.ed.diag))
+U1.c.diag = lapply(U1.c, function(U) U + 0.01 * diag(8))
+m1.fit.diff.diag = mash(m1.data, c(U1.c.diag, U1.ed))
 fpmash.diff.diag = length(get_significant_results(m1.fit.diff.diag))
 ```
 
@@ -102,8 +102,8 @@ barplot(get_estimated_pi(m2.fit.mean), las=2, cex.names = 0.7)
 
 Add a small number on the diagonal of priors:
 ```{r}
-U2.ed.diag = lapply(U2.ed, function(U) U + 0.01 * diag(8))
-m2.fit.mean.diag = mash(m2.data.L, c(U2.c, U2.ed.diag))
+U2.c.diag = lapply(U2.c, function(U) U + 0.01 * diag(8))
+m2.fit.mean.diag = mash(m2.data.L, c(U2.c.diag, U2.ed))
 fpmash.mean.diag = length(get_significant_results(m2.fit.mean.diag))
 ```
 
