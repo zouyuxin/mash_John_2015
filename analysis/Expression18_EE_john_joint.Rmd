@@ -19,7 +19,6 @@ Implement `mash` on John's data at time point 18.
 data = readRDS('../output/Expression_john_joint.rds')
 beta_class = data$beta
 sebeta_class = data$sebeta
-df_class = data$df
 ```
 
 Set mash data object
@@ -33,23 +32,32 @@ Top genes:
 # find strong genes
 m.1by1 = mash_1by1(mash.data.L, alpha=0)
 strong = get_significant_results(m.1by1)
-
-data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
-data.strong.L = mash_update_data(data.strong, ref = 'none')
 ```
 There are `r length(strong)` strong genes for at least one bacteria using `ash` condition-by-condition.
 
-## Estimate covariance structures
+## Use all strong genes
 
-Data Driven:
-
-Flash:
-```{r flash, message=FALSE}
-flash.data = flash_set_data(data.strong.L$Bhat)
-fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
+```{r}
+data.strong = mash_set_data(Bhat = beta_class[strong,], Shat = sebeta_class[strong,])
+data.strong.L = mash_update_data(data.strong, ref='none')
 ```
 
-```{r flash plot}
+Flash:
+```{r, eval=FALSE}
+flash.data = flash_set_data(data.strong.L$Bhat)
+fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
+saveRDS(fmodel, '../output/Expression18_EE_jointmean_flash.rds')
+```
+
+```{r cov from flash}
+fmodel = readRDS('../output/Expression18_EE_jointmean_flash.rds')
+Factors = fmodel$ldf$f
+Flash_res = flash_get_fitted_values(fmodel)
+U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), "Flash"), 
+            list("tFlash" = t(Flash_res) %*% Flash_res / nrow(Flash_res)))
+```
+
+```{r}
 factors = flash_get_ldf(fmodel)$f
 row.names(factors) = colnames(beta_class)[2:9]
 pve.order = order(fmodel$pve, decreasing = TRUE)
@@ -61,42 +69,110 @@ for(i in pve.order){
 par(mfrow=c(1,1))
 ```
 
-```{r cov from flash}
+PCA:
+```{r pca}
+U.pca = cov_pca(data.strong.L, 3)
+```
+
+Canonical:
+```{r Canonical}
+U.c = cov_canonical(data.strong.L)
+```
+
+ED:
+```{r ED, eval=FALSE}
+X.center = apply(data.strong.L$Bhat, 2, function(x) x - mean(x))
+U.dd = c(U.pca, U.Flash, list('XX' = t(X.center) %*% X.center / nrow(X.center)))
+saveRDS(cov_ed(data.strong.L, U.dd), '../output/Expression18_EE_jointmean_ED.rds')
+```
+
+```{r mash, eval=FALSE}
+U.ed = readRDS('../output/Expression18_EE_jointmean_ED.rds')
+saveRDS(mash(mash.data.L, c(U.c, U.ed)), '../output/Expression18_jointmean_mash_model.rds') 
+```
+
+```{r}
+mash.model = readRDS('../output/Expression18_jointmean_mash_model.rds') 
+```
+There are `r length(get_significant_results(mash.model))` DE genes.
+
+## Use random subset of strong genes
+
+We randomly sample 5000 strong genes to learn data driven patterns.
+
+```{r}
+set.seed(1234)
+idx = sample(strong, 5000, replace = FALSE)
+data.strong = mash_set_data(Bhat = beta_class[idx,], Shat = sebeta_class[idx,])
+data.strong.L = mash_update_data(data.strong, ref='none')
+```
+
+We randomly sample 7000 genes to fit mash model.
+
+```{r}
+set.seed(3456)
+idx = sample(1:nrow(beta_class), 7000, replace = FALSE)
+data.random = mash_set_data(Bhat = beta_class[idx,], Shat = sebeta_class[idx,])
+data.random.L = mash_update_data(data.random, ref='none')
+```
+
+Flash:
+```{r, eval=FALSE}
+flash.data = flash_set_data(data.strong.L$Bhat)
+fmodel = flash(flash.data, greedy = TRUE, backfit = TRUE)
+saveRDS(fmodel, '../output/Expression18_EE_jointmean_subset_flash.rds')
+```
+
+```{r subset cov from flash}
+fmodel = readRDS('../output/Expression18_EE_jointmean_subset_flash.rds')
 Factors = fmodel$ldf$f
 Flash_res = flash_get_fitted_values(fmodel)
 U.Flash = c(mashr:::cov_from_factors(t(as.matrix(Factors)), "Flash"), 
             list("tFlash" = t(Flash_res) %*% Flash_res / nrow(Flash_res)))
 ```
 
+```{r}
+factors = flash_get_ldf(fmodel)$f
+row.names(factors) = colnames(beta_class)[2:9]
+pve.order = order(fmodel$pve, decreasing = TRUE)
+
+par(mfrow=c(2,3))
+for(i in pve.order){
+  barplot(factors[,i], main=paste0('Factor ',i, ' pve= ', round(fmodel$pve[i],3)), las=2, cex.names = 0.7)
+}
+par(mfrow=c(1,1))
+```
+
 PCA:
-```{r pca}
+```{r subset pca}
 U.pca = cov_pca(data.strong.L, 3)
 ```
 
-Canonical
-```{r Canonical}
+Canonical:
+```{r subset Canonical}
 U.c = cov_canonical(data.strong.L)
 ```
 
-Extreme Deconvolution
-```{r ED, eval=FALSE}
+ED:
+```{r subset ED, eval=FALSE}
 X.center = apply(data.strong.L$Bhat, 2, function(x) x - mean(x))
 U.dd = c(U.pca, U.Flash, list('XX' = t(X.center) %*% X.center / nrow(X.center)))
-
-U.ed = U.dd[c('tPCA', 'tFlash', 'XX')]
-saveRDS(cov_ed(data.strong.L, U.ed), '../output/Expression18_EE_jointmean_ED.rds')
+saveRDS(cov_ed(data.strong.L, U.dd), '../output/Expression18_EE_jointmean_subset_ED.rds')
 ```
 
-## Mash model
+```{r subset mash, eval=FALSE}
+U.ed = readRDS('../output/Expression18_EE_jointmean_subset_ED.rds')
+m.model = mash(data.random.L, c(U.c, U.ed), outputlevel = 1)
+m.model$result = mash_compute_posterior_matrices(m.model, mash.data.L)
+saveRDS(m.model, '../output/Expression18_jointmean_subset_mash_model.rds') 
+```
 
 ```{r}
-U.ed = readRDS('../output/Expression18_EE_jointmean_ED.rds')
+mash.model = readRDS('../output/Expression18_jointmean_subset_mash_model.rds') 
 ```
+There are `r length(get_significant_results(mash.model))` DE genes.
 
-```{r mash, eval=FALSE}
-saveRDS(mash(mash.data.L, c(U.c, U.ed, U.dd[c('PCA_1','PCA_2','PCA_3', paste0('Flash_',1:9))])), '../output/Expression18_jointmean_mash_model.rds') 
-```
-
+<!--
 ## Result
 
 ```{r}
@@ -349,8 +425,10 @@ p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) +
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
-# Session information
 
+-->
+
+## Session information
 <!-- Insert the session information into the document -->
 ```{r session-info}
 ```
