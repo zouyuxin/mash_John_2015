@@ -682,6 +682,33 @@ p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) +
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
 <p><img src="Expression18_EE_john_joint_result_files/figure-html/allgene3-1.png" width="960" /></p>
+<p>All in Cormofit. None in mash.</p>
+<pre class="r"><code># before 1535
+gene1535 = data.frame(mash.data.L$Bhat[1535,])
+colnames(gene1535) = &#39;Deviations&#39;
+gene1535$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene1535$se = mash.data.L$Shat[1535,]
+gene1535$Deviations[gene1535$se == 0] = NA
+# after
+gene1535.post = data.frame(m.model$result$PosteriorMean[1535,])
+colnames(gene1535.post) = &#39;Deviations&#39;
+gene1535.post$Group = factor(c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;), levels = c(&#39;Rv&#39;, &#39;Rvplus&#39;, &#39;GC&#39;, &#39;BCG&#39;, &#39;Smeg&#39;, &#39;Yers&#39;, &#39;Salm&#39;, &#39;Staph&#39;))
+gene1535.post$se = m.model$result$PosteriorSD[1535,]
+
+p.orig = ggplot(gene1535, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-8,3) +
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000090920 original&#39; )
+
+p.post = ggplot(gene1535.post, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-8, 3) +
+  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
+  geom_hline(yintercept = 0, linetype=&quot;dotted&quot;, color = &quot;grey&quot;, size=1) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = &quot;black&quot;), legend.position = &quot;none&quot;, plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle(&#39;ENSG00000090920 mash&#39;)
+
+ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))</code></pre>
+<p><img src="Expression18_EE_john_joint_result_files/figure-html/allgene4-1.png" width="960" /></p>
 <p>Non-DE in Cormotif. Strong in Smeg in mash.</p>
 <pre class="r"><code># before
 gene5252 = data.frame(mash.data.L$Bhat[5252,])
