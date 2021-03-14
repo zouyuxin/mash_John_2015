@@ -178,28 +178,28 @@ Yers-Salm cluster in Cormotif. All effects in mash.
 
 ```{r YSgene1, fig.height=5, fig.width=10}
 # before 11952
-gene3696 = data.frame(mash.data.L$Bhat[3696,])
-colnames(gene3696) = 'Deviations'
-gene3696$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
-gene3696$se = mash.data.L$Shat[3696,]
-gene3696$Deviations[gene3696$se == 0] = NA
+gene1177 = data.frame(mash.data.L$Bhat[1177,])
+colnames(gene1177) = 'Deviations'
+gene1177$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
+gene1177$se = mash.data.L$Shat[1177,]
+gene1177$Deviations[gene1177$se == 0] = NA
 # after
-gene3696.post = data.frame(m.model$result$PosteriorMean[3696,])
-colnames(gene3696.post) = 'Deviations'
-gene3696.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
-gene3696.post$se = m.model$result$PosteriorSD[3696,]
+gene1177.post = data.frame(m.model$result$PosteriorMean[1177,])
+colnames(gene1177.post) = 'Deviations'
+gene1177.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
+gene1177.post$se = m.model$result$PosteriorSD[1177,]
 
-p.orig = ggplot(gene3696, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1.5,0.5) +
+p.orig = ggplot(gene1177, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-0.5,3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000117408 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('CDC14A original log 2 fold change' )
 
-p.post = ggplot(gene3696.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-1.5,0.5) +
+p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) + 
+  geom_point() + ylim(-0.5,3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000117408 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('CDC14A mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
@@ -223,49 +223,19 @@ p.orig = ggplot(gene7637, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(-8,3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000158488 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('CD1E original log 2 fold change' )
 
 p.post = ggplot(gene7637.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(-8, 3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000158488 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('CD1E mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
 All in Cormofit. All in mash.
-
 ```{r allgene1, fig.height=5, fig.width=10}
-# before # 5048 # 1177
-gene1177 = data.frame(mash.data.L$Bhat[1177,])
-colnames(gene1177) = 'Deviations'
-gene1177$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
-gene1177$se = mash.data.L$Shat[1177,]
-gene1177$Deviations[gene1177$se == 0] = NA
-# after
-gene1177.post = data.frame(m.model$result$PosteriorMean[1177,])
-colnames(gene1177.post) = 'Deviations'
-gene1177.post$Group = factor(c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'), levels = c('Rv', 'Rvplus', 'GC', 'BCG', 'Smeg', 'Yers', 'Salm', 'Staph'))
-gene1177.post$se = m.model$result$PosteriorSD[1177,]
-
-p.orig = ggplot(gene1177, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-0.5,3) +
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
-  geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000079335 original' )
-
-p.post = ggplot(gene1177.post, aes(y = Deviations, x = Group, color=Group)) + 
-  geom_point() + ylim(-0.5, 3) +
-  geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
-  geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000079335 mash')
-
-ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
-```
-
-All in Cormofit. All in mash.
-```{r allgene2, fig.height=5, fig.width=10}
 # before
 gene11445 = data.frame(mash.data.L$Bhat[11445,])
 colnames(gene11445) = 'Deviations'
@@ -282,19 +252,19 @@ p.orig = ggplot(gene11445, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(0,4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000196639 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('HRH1 original log 2 fold change' )
 
 p.post = ggplot(gene11445.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(0, 4) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000196639 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('HRH1 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
 All in Cormofit. All in mash.
-```{r allgene3, fig.width=10, fig.height=5}
+```{r allgene2, fig.width=10, fig.height=5}
 # before
 gene2481 = data.frame(mash.data.L$Bhat[2481,])
 colnames(gene2481) = 'Deviations'
@@ -311,20 +281,20 @@ p.orig = ggplot(gene2481, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000105497 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ZNF175 original log 2 fold change' )
 
 p.post = ggplot(gene2481.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000105497 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ZNF175 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
 
 All in Cormofit. None in mash.
 
-```{r allgene4, fig.height=5, fig.width=10}
+```{r allgene3, fig.height=5, fig.width=10}
 # before 1535
 gene1535 = data.frame(mash.data.L$Bhat[1535,])
 colnames(gene1535) = 'Deviations'
@@ -341,13 +311,13 @@ p.orig = ggplot(gene1535, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + ylim(-8,3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000090920 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('FCGBP original log 2 fold change' )
 
 p.post = ggplot(gene1535.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + ylim(-8, 3) +
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000090920 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('FCGBP mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
@@ -370,13 +340,13 @@ p.orig = ggplot(gene5252, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000134321 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('RSAD2 original log 2 fold change' )
 
 p.post = ggplot(gene5252.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000134321 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('RSAD2 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
@@ -399,13 +369,13 @@ p.orig = ggplot(gene12428, aes(y = Deviations, x = Group, color=Group)) +
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) +
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000134321 original' )
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('TRIM26 original log 2 fold change' )
 
 p.post = ggplot(gene12428.post, aes(y = Deviations, x = Group, color=Group)) + 
   geom_point() + 
   geom_errorbar(aes(ymin=Deviations-1.96*se, ymax=Deviations+1.96*se), width=0.4) + 
   geom_hline(yintercept = 0, linetype="dotted", color = "grey", size=1) + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('ENSG00000134321 mash')
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),axis.line = element_line(colour = "black"), legend.position = "none", plot.title = element_text(size = 10), axis.text=element_text(size=10)) + coord_flip() + ggtitle('TRIM26 mash')
 
 ggarrange(p.orig, p.post, ncol=2, nrow=1, heights = c(5, 5), widths = c(5,5))
 ```
